@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  phone       String        @unique
+  name        String?
+  createdAt   DateTime      @default(now()) @db.Timestamp()
+  updatedAt   DateTime      @updatedAt @db.Timestamp()
+  Transaction Transaction[]
+}
+
+model Transaction {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  action     String?  @db.VarChar(255)
+  date       String?  @db.VarChar(255)
+  amount     Float
+  currency   String
+  particular String?  @db.VarChar(255)
+  phone      String
+  createdAt  DateTime @default(now()) @db.Timestamp()
+  updatedAt  DateTime @updatedAt @db.Timestamp()
+
+  user User @relation(fields: [phone], references: [phone])
+}
