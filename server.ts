@@ -7,7 +7,7 @@ import morgan from "morgan" //for printing API logs
 import {default as axios} from "axios"
 import { PrismaClient } from "@prisma/client";
 import logger from "./utils/logger.js"
-
+import * as process from "process";
 
 //Add logger
 // @ts-ignore
@@ -28,9 +28,9 @@ app.use(morgan("dev"))
 app.get("/", async (_req, res) => {
     return res.send({success: true, message: "hooray.... it's working bruh"})
 })
-
 const prisma = new PrismaClient();
 
+console.log("Here: ", process.env.NODE_ENV);
 
 const getExpenseJsonFromNatualLanguage = async (prompt: string) => {
     const data = JSON.stringify({
@@ -70,53 +70,6 @@ const getExpenseJsonFromNatualLanguage = async (prompt: string) => {
     }
 }
 
-app.post("/callback/whatsapp", async (req, res) => {
-    console.log("Here: ", req.body)
-    let json
-    let total
-    try {
-        const prompt = req.body.Body
-        json = await getExpenseJsonFromNatualLanguage(prompt)
-    } catch (e) {
-        console.log("Error converting body: ", e)
-        if (e == "AI")
-            return res.send("Failed to add transaction, please try again.")
-        else if (e == "Error: user") return res.send("User not registered")
-        return res.send("failed to capture body")
-    }
-
-    //Add transaction to transaction table
-    //Create user if not exists
-    const phone = req.body.WaId
-    const name = req.body.ProfileName
-    let user = await prisma.user.findUnique({where:{phone}})
-    if (!user) {
-        user = await prisma.user.create({data: {phone, name}})
-        if (!user) return
-    }
-    //add transaction
-    json = JSON.parse(json)
-    let transaction = {
-        action: json.action,
-        amount: json.amount || 0,
-        currency: json.currency || "INR",
-        particular: json.particular || "transaction name",
-        phone: phone,
-    }
-    console.log("Here: ", json.amount);
-    if(transaction.amount == 0 )
-        return res.sendStatus(400);
-    if (transaction.action == "expense") transaction.amount = -transaction.amount
-    try{
-    let transactionObject = await prisma.transaction.create({data: transaction})
-    console.log("Here: ", transactionObject);
-    if (!transactionObject) console.log("Failed to add transaction")
-    }catch (e){
-        console.log("HerEr: ", e);
-    }
-
-    return res.sendStatus(200)
-})
 
 app.listen(port, () => {
     console.log(`App listening on ${port}`)

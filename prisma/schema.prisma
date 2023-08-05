@@ -11,24 +11,123 @@ datasource db {
 }
 
 model User {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  phone       String        @unique
-  name        String?
-  createdAt   DateTime      @default(now()) @db.Timestamp()
-  updatedAt   DateTime      @updatedAt @db.Timestamp()
-  Transaction Transaction[]
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name          String?
+  phone         String?        @unique
+  email         String?        @unique
+  password      String
+  role          UserRole       @default(USER)
+  createdAt     DateTime       @default(now()) @db.Timestamp()
+  updatedAt     DateTime       @updatedAt @db.Timestamp()
+  // Relations
+  transactions  Transaction[]
+  subscriptions Subscription[]
+  accounts      Account[]
 }
 
 model Transaction {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  action     String?  @db.VarChar(255)
-  date       String?  @db.VarChar(255)
-  amount     Float
-  currency   String
-  particular String?  @db.VarChar(255)
-  phone      String
-  createdAt  DateTime @default(now()) @db.Timestamp()
-  updatedAt  DateTime @updatedAt @db.Timestamp()
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  type        TransactionAction @default(EXPENSE)
+  amount      Float
+  currency    currency          @default(INR)
+  particular  String? // title | name
+  description String?
+  date        DateTime?
+  place       String?
+  createdAt   DateTime          @default(now()) @db.Timestamp()
+  updatedAt   DateTime          @updatedAt @db.Timestamp()
+  // Relations
+  userId      String            @db.Uuid()
+  user        User              @relation(fields: [userId], references: [id])
+  accountId   String            @db.Uuid()
+  account     Account           @relation(fields: [accountId], references: [id])
+  categoriId  String            @db.Uuid()
+  categori    Category          @relation(fields: [categoriId], references: [id])
+}
 
-  user User @relation(fields: [phone], references: [phone])
+model Subscription {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name        String
+  description String?
+  logo        String?
+  price       Float
+  currency    currency           @default(INR)
+  active      Boolean            @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  interval    subscriptionPeriod @default(MONTHLY)
+  createdAt   DateTime           @default(now()) @db.Timestamp()
+  updatedAt   DateTime           @updatedAt @db.Timestamp()
+  // Relations
+  userId      String             @db.Uuid()
+  user        User               @relation(fields: [userId], references: [id])
+  accountId   String             @db.Uuid()
+  account     Account            @relation(fields: [accountId], references: [id])
+  categoriId  String             @db.Uuid()
+  categori    Category           @relation(fields: [categoriId], references: [id])
+}
+
+model Account {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name          String
+  type          AccountType
+  balance       Float
+  createdAt     DateTime       @default(now()) @db.Timestamp()
+  updatedAt     DateTime       @updatedAt @db.Timestamp()
+  // Relations
+  userId        String         @db.Uuid()
+  user          User           @relation(fields: [userId], references: [id])
+  transaction   Transaction[]
+  subscriptions Subscription[]
+}
+
+model Category {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  title         String
+  description   String
+  createdAt     DateTime       @default(now()) @db.Timestamp()
+  updatedAt     DateTime       @updatedAt @db.Timestamp()
+  // Relations
+  transactions  Transaction[]
+  subscriptions Subscription[]
+}
+
+// TODO: Add subcategories
+
+// User enums
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Transaction enums
+enum TransactionAction {
+  INCOME
+  EXPENSE
+  SUBSCRIPTION
+}
+
+// Subscription enums
+enum subscriptionPeriod {
+  MONTHLY
+  QUARTERLY
+  HALF_YEARLY
+  YEARLY
+}
+
+// Account enums
+enum AccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+  DEBIT_CARD
+  LOAN
+  INVESTMENT
+}
+
+// Comman enums
+enum currency {
+  INR
+  USD
+  EUR
 }
