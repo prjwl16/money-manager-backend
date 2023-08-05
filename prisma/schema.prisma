@@ -15,7 +15,7 @@ model User {
   name          String?
   phone         String?        @unique
   email         String?        @unique
-  password      String
+  password      String?
   role          UserRole       @default(USER)
   createdAt     DateTime       @default(now()) @db.Timestamp()
   updatedAt     DateTime       @updatedAt @db.Timestamp()
@@ -70,7 +70,7 @@ model Subscription {
 model Account {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
   name          String
-  type          AccountType
+  type          AccountType    @default(CASH)
   balance       Float
   createdAt     DateTime       @default(now()) @db.Timestamp()
   updatedAt     DateTime       @updatedAt @db.Timestamp()
@@ -84,7 +84,7 @@ model Account {
 model Category {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
   title         String
-  description   String
+  description   String?
   createdAt     DateTime       @default(now()) @db.Timestamp()
   updatedAt     DateTime       @updatedAt @db.Timestamp()
   // Relations

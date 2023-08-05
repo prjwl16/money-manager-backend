@@ -1,14 +1,10 @@
 import { NextFunction, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import logger from '@utils/logger.js'
-import { Request } from '../types/Request.js'
+import logger from '../utils/logger.js'
+import { Request } from '../types/Request'
 
 const secret: string = process.env.SECRET_KEY || 'nodeSecret'
-export const verifyToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   const bearerHeader = req.headers['authorization']
   if (typeof bearerHeader !== 'undefined') {
     const token = bearerHeader.split('')[1]
@@ -33,13 +29,20 @@ export const verifyToken = async (
   }
 }
 
-export const createToken = (email: String) => {
-  const expiresIn = 3 * 30 * 24 * 60 * 60
-  const payload = {
-    email,
+export const createToken = (id: string, email?: string, phone?: string) => {
+  try {
+    const expiresIn = 3 * 30 * 24 * 60 * 60
+    const payload = {
+      id,
+      email,
+      phone,
+    }
+    const token = jwt.sign(payload, secret, {
+      expiresIn,
+    })
+    return token
+  } catch (e) {
+    logger.error(e)
+    throw Error('token')
   }
-  const token = jwt.sign(payload, secret, {
-    expiresIn,
-  })
-  return token
 }
