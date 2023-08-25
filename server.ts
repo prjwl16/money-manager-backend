@@ -7,6 +7,8 @@ import morgan from 'morgan' //for printing API logs
 import logger from './src/utils/logger.js'
 import * as process from 'process'
 import baseRouter from './src/routes/index.js'
+import passport from 'passport'
+import './src/config/passport.js'
 
 //Add logger
 // @ts-ignore
@@ -16,11 +18,27 @@ global.logger = logger
 const app = express()
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000
 
+//Keep it, it's important -> and learn session
+// app.use(
+//   session({
+//     resave: false,
+//     saveUninitialized: true,
+//     secret: 'idk,I must read the docs',
+//   })
+// )
+
 //Add middlewares
-app.use(cors())
+app.use(
+  cors({
+    origin: process.env.ORIGIN,
+    credentials: true,
+  })
+)
 app.use(bodyParser.json())
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
+
+app.use(passport.initialize())
 
 if (process.env.NODE_ENV === 'DEV') {
   app.use(morgan('dev'))
