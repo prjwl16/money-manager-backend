@@ -32,7 +32,7 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
   }
 }
 
-export const createToken = (id: string, email?: string, phone?: string, role?: string) => {
+export const createToken = (id: string, email?: string | null, phone?: string | null, role?: string) => {
   try {
     const payload = {
       id,

@@ -7,6 +7,13 @@ interface UserData {
   email?: string
   phone?: string
   password?: string
+  splitwiseUserId?: number
+  splitwiseAccessToken?: string
+}
+
+interface updateQuery {
+  email?: string
+  phone?: string
 }
 
 export const getUserByEmail = async (email: string) => {
@@ -34,4 +41,10 @@ export const validateUser = async (userPassword: string, dbPassword: string) => 
 
 export const authenticate = async (userPassword: string, dbPassword: string) => {
   return await bcrypt.compare(userPassword, dbPassword)
+}
+
+export const updateUser = async (updateQuery: updateQuery, user: UserData) => {
+  console.log('~ Updating user: ', user)
+  if (updateQuery.email) return User.update({ where: { email: updateQuery.email }, data: user })
+  else return User.update({ where: { phone: updateQuery.phone }, data: user })
 }
