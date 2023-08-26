@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express'
 import passport from 'passport'
 import { createToken } from '../middleware/jwt.js'
+import { handleGoogleCallBack } from '../controller/oauthController.js'
 
 const router = Router()
 
@@ -12,23 +13,13 @@ router.get('/google', passport.authenticate('google'))
 const successRedirectUrl = `${SERVER_URL}/oauth/google/success`
 const failedRedirectUrl = `${SERVER_URL}/oauth/google/failed`
 
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    failureMessage: 'Authentication Failed!',
-    failureRedirect: failedRedirectUrl,
-    session: false,
-  }),
-  async (req: Request, res: Response) => {
-    //create jwt token
-    if (req.user) {
-      const user = JSON.parse(JSON.stringify(req.user))
-      const token = createToken(user.id, user.email, user.phone, user.role)
-      res.redirect(`${FRONTEND_URL}/oauth?token=${token}`)
-    }
-    res.redirect(`${FRONTEND_URL}`)
-  }
-)
+const passportOptions = {
+  failureMessage: 'Authentication Failed!',
+  failureRedirect: failedRedirectUrl,
+  session: false,
+}
+
+router.get('/google/callback', passport.authenticate('google', passportOptions), handleGoogleCallBack)
 
 // router.get('/google/success', (req, res) => {
 //   console.log('~~~~4~~~~~')
