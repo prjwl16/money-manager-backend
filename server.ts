@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 import morgan from 'morgan' //for printing API logs
 import logger from './src/utils/logger.js'
 import * as process from 'process'
-import baseRouter from './src/routes/index.js'
+import { baseRouter } from './src/routes/index.js'
 import passport from 'passport'
 import './src/config/passport.js'
 

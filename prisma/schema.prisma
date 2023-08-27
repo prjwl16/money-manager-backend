@@ -11,95 +11,131 @@ datasource db {
 }
 
 model User {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
   firstName            String?
   lastName             String?
-  phone                String?  @unique
-  email                String?  @unique
+  phone                String?               @unique
+  email                String?               @unique
   password             String?
-  role                 UserRole @default(USER)
-  createdAt            DateTime @default(now()) @db.Timestamp()
-  updatedAt            DateTime @updatedAt @db.Timestamp()
-  googleId             String?  @unique
-  secret               String?  @unique
+  role                 UserRole              @default(USER)
+  createdAt            DateTime              @default(now()) @db.Timestamp()
+  updatedAt            DateTime              @updatedAt @db.Timestamp()
+  googleId             String?               @unique
+  secret               String?               @unique
   avatar               String?
-  splitwiseUserId      Int?     @unique
+  splitwiseUserId      Int?                  @unique
   splitwiseAccessToken String?
-
   // Relations
-  transactions  Transaction[]
-  subscriptions Subscription[]
-  accounts      Account[]
+  accounts             Account[] // One to many
+  userInGroups         userInGroups[] // Many to many
+  usersInTransactions  usersInTransactions[] // Many to many
+  transactionPaid      Transaction[]         @relation("PaidBy")
+  transactionCreated   Transaction[]         @relation("CreatedBy")
+  groups               groups[]              @relation("createdBy")
 }
 
 model Transaction {
-  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  type        TransactionAction @default(EXPENSE)
-  amount      Float
-  currency    currency          @default(INR)
-  particular  String? // title | name
-  description String?
-  date        DateTime?
-  place       String?
-  createdAt   DateTime          @default(now()) @db.Timestamp()
-  updatedAt   DateTime          @updatedAt @db.Timestamp()
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  type                 TransactionAction     @default(EXPENSE)
+  amount               Float
+  currency             currency              @default(INR)
+  particular           String? // title | name
+  description          String?
+  date                 DateTime?
+  place                String?
+  createdAt            DateTime              @default(now()) @db.Timestamp()
+  updatedAt            DateTime              @updatedAt @db.Timestamp()
+  // Subscription
+  logo                 String?
+  active               Boolean               @default(true)
+  plan                 subscriptionPeriod    @default(MONTHLY)
+  subcriptionStartDate DateTime?
+  subcriptionEndDate   DateTime?
+  // Splitwise
+  swExpenseId          Int?                  @unique
+  swGroupId            Int?                  @unique
   // Relations
-  userId      String            @db.Uuid()
-  user        User              @relation(fields: [userId], references: [id])
-  accountId   String            @db.Uuid()
-  account     Account           @relation(fields: [accountId], references: [id])
-  categoriId  String            @db.Uuid()
-  categori    Category          @relation(fields: [categoriId], references: [id])
-}
+  accountId            String                @db.Uuid() // Many to one
+  account              Account               @relation(fields: [accountId], references: [id])
+  categoryId           String                @db.Uuid() // Many to one
+  category             Category              @relation(fields: [categoryId], references: [id])
+  groupId              String?               @db.Uuid() // Many to one
+  groups               groups?               @relation(fields: [groupId], references: [id])
+  usersInTransactions  usersInTransactions[] // Many to many
+  paidById             String?               @db.Uuid()
+  createdById          String?               @db.Uuid()
+  updatedByIds         String[]              @db.Uuid()
 
-model Subscription {
-  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  name        String
-  description String?
-  logo        String?
-  price       Float
-  currency    currency           @default(INR)
-  active      Boolean            @default(true)
-  startDate   DateTime?
-  endDate     DateTime?
-  interval    subscriptionPeriod @default(MONTHLY)
-  createdAt   DateTime           @default(now()) @db.Timestamp()
-  updatedAt   DateTime           @updatedAt @db.Timestamp()
-  // Relations
-  userId      String             @db.Uuid()
-  user        User               @relation(fields: [userId], references: [id])
-  accountId   String             @db.Uuid()
-  account     Account            @relation(fields: [accountId], references: [id])
-  categoriId  String             @db.Uuid()
-  categori    Category           @relation(fields: [categoriId], references: [id])
+  paidBy    User? @relation("PaidBy", fields: [paidById], references: [id])
+  createdBy User? @relation("CreatedBy", fields: [createdById], references: [id])
 }
 
 model Account {
-  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  name          String
-  type          AccountType    @default(CASH)
-  balance       Float
-  createdAt     DateTime       @default(now()) @db.Timestamp()
-  updatedAt     DateTime       @updatedAt @db.Timestamp()
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  name        String        @unique
+  type        AccountType   @default(CASH)
+  balance     Float
+  createdAt   DateTime      @default(now()) @db.Timestamp()
+  updatedAt   DateTime      @updatedAt @db.Timestamp()
   // Relations
-  userId        String         @db.Uuid()
-  user          User           @relation(fields: [userId], references: [id])
-  transaction   Transaction[]
-  subscriptions Subscription[]
+  userId      String        @db.Uuid() // Many to one
+  user        User          @relation(fields: [userId], references: [id])
+  transaction Transaction[] // Many to many
 }
 
+// TODO Add user id
 model Category {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  swId         Int?          @unique
+  title        String
+  description  String?
+  createdAt    DateTime      @default(now()) @db.Timestamp()
+  updatedAt    DateTime      @updatedAt @db.Timestamp()
+  // Relations
+  transactions Transaction[] // Many to many
+}
+
+// TODO: Add subcategoryes
+
+model groups {
   id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  title         String
+  name          String?
   description   String?
+  logo          String?
   createdAt     DateTime       @default(now()) @db.Timestamp()
   updatedAt     DateTime       @updatedAt @db.Timestamp()
   // Relations
-  transactions  Transaction[]
-  subscriptions Subscription[]
+  transactions  Transaction[] // Many to many
+  userInGroups  userInGroups[] // Many to many
+  // User who created the group
+  createdBy     String?        @db.Uuid()
+  createdByUser User?          @relation("createdBy", fields: [createdBy], references: [id])
 }
 
-// TODO: Add subcategories
+// Many to many tables
+model userInGroups {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid()
+  groups    groups   @relation(fields: [groupId], references: [id])
+  groupId   String   @db.Uuid()
+  createdAt DateTime @default(now()) @db.Timestamp()
+  updatedAt DateTime @updatedAt @db.Timestamp()
+
+  @@id([userId, groupId])
+}
+
+model usersInTransactions {
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String      @db.Uuid()
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String      @db.Uuid()
+  createdAt     DateTime    @default(now()) @db.Timestamp()
+  updatedAt     DateTime    @updatedAt @db.Timestamp()
+  // Splitwise
+  splitShare    Float       @default(0)
+
+  @@id([userId, transactionId])
+}
 
 // User enums
 enum UserRole {
@@ -129,12 +165,10 @@ enum AccountType {
   CREDIT_CARD
   DEBIT_CARD
   LOAN
-  INVESTMENT
 }
 
 // Comman enums
 enum currency {
   INR
   USD
-  EUR
 }

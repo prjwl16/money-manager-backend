@@ -21,4 +21,4 @@ router.get('/', (_req, res) => {
 
 router.get('/callback', handleSplitwiseCallBack)
 
-export { router as splitwiseRouter }
+export { router as splitwiseRouterAuth }

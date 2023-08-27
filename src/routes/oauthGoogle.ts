@@ -23,4 +23,4 @@ router.get(
   handleGoogleCallBack
 )
 
-export { router as googleRouter }
+export { router as googleRouterAuth }
