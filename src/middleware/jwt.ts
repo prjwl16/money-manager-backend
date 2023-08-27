@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import logger from '../utils/logger.js'
+import { getUserByEmail } from '../db/user.js'
 
 const secret: string = process.env.SECRET_KEY || 'nodeSecret'
 
@@ -11,10 +12,13 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     console.log('token: ', bearerHeader)
     try {
       const data = jwt.verify(token, secret)
+      if (typeof data === 'string') throw Error('Invalid token provided')
+      const user = await getUserByEmail(data.email)
       res.locals = {
-        data,
+        user,
       }
     } catch (err) {
+      console.log('Error in verifyToken: ', err)
       logger.error(err)
       res
         .send({

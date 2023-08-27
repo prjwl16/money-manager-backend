@@ -1,7 +1,6 @@
 import { Request, Response, Router } from 'express'
 
 import { createUser, getUserByEmail, getUserByPhone, validateUser } from '../db/user.js'
-const authRouter = Router()
 import { success } from '../../constants/success.js'
 import logger from '../utils/logger.js'
 import { createToken } from '../middleware/jwt.js'
@@ -12,6 +11,8 @@ import {
   singInValidate,
   validateRequest,
 } from '../middleware/validator/RequestValidator.js'
+
+const authRouter = Router()
 
 const singIn = async (req: Request, res: Response) => {
   const { email, phone, password } = req.body
