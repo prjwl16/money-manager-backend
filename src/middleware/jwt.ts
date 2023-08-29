@@ -9,7 +9,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
   const bearerHeader = req.headers['authorization']
   if (typeof bearerHeader !== 'undefined') {
     const token = bearerHeader.split(' ')[1]
-    console.log('token: ', bearerHeader)
     try {
       const data = jwt.verify(token, secret)
       if (typeof data === 'string') throw Error('Invalid token provided')

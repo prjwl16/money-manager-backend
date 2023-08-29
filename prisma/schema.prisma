@@ -32,39 +32,41 @@ model User {
   transactionPaid      Transaction[]         @relation("PaidBy")
   transactionCreated   Transaction[]         @relation("CreatedBy")
   groups               groups[]              @relation("createdBy")
+  Category             Category[]
 }
 
 model Transaction {
-  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  type                 TransactionAction     @default(EXPENSE)
-  amount               Float
-  currency             currency              @default(INR)
-  particular           String? // title | name
-  description          String?
-  date                 DateTime?
-  place                String?
-  createdAt            DateTime              @default(now()) @db.Timestamp()
-  updatedAt            DateTime              @updatedAt @db.Timestamp()
+  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  type                  TransactionAction     @default(EXPENSE)
+  amount                Float
+  currency              currency              @default(INR)
+  particular            String? // title | name
+  description           String?
+  date                  DateTime?
+  place                 String?
+  createdAt             DateTime              @default(now()) @db.Timestamp()
+  updatedAt             DateTime              @updatedAt @db.Timestamp()
   // Subscription
-  logo                 String?
-  active               Boolean               @default(true)
-  plan                 subscriptionPeriod    @default(MONTHLY)
-  subcriptionStartDate DateTime?
-  subcriptionEndDate   DateTime?
+  logo                  String?
+  isSubscription        Boolean               @default(false)
+  active                Boolean               @default(true)
+  plan                  subscriptionPeriod    @default(ONETIME)
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
   // Splitwise
-  swExpenseId          Int?                  @unique
-  swGroupId            Int?                  @unique
+  swExpenseId           Int?                  @unique
+  swGroupId             Int?                  @unique
   // Relations
-  accountId            String                @db.Uuid() // Many to one
-  account              Account               @relation(fields: [accountId], references: [id])
-  categoryId           String                @db.Uuid() // Many to one
-  category             Category              @relation(fields: [categoryId], references: [id])
-  groupId              String?               @db.Uuid() // Many to one
-  groups               groups?               @relation(fields: [groupId], references: [id])
-  usersInTransactions  usersInTransactions[] // Many to many
-  paidById             String?               @db.Uuid()
-  createdById          String?               @db.Uuid()
-  updatedByIds         String[]              @db.Uuid()
+  accountId             String                @db.Uuid() // Many to one
+  account               Account               @relation(fields: [accountId], references: [id])
+  categoryId            String                @db.Uuid() // Many to one
+  category              Category              @relation(fields: [categoryId], references: [id])
+  groupId               String?               @db.Uuid() // Many to one
+  groups                groups?               @relation(fields: [groupId], references: [id])
+  usersInTransactions   usersInTransactions[] // Many to many
+  paidById              String?               @db.Uuid()
+  createdById           String?               @db.Uuid()
+  updatedByIds          String[]              @db.Uuid()
 
   paidBy    User? @relation("PaidBy", fields: [paidById], references: [id])
   createdBy User? @relation("CreatedBy", fields: [createdById], references: [id])
@@ -92,6 +94,8 @@ model Category {
   createdAt    DateTime      @default(now()) @db.Timestamp()
   updatedAt    DateTime      @updatedAt @db.Timestamp()
   // Relations
+  userId       String?       @db.Uuid() // Many to one
+  user         User?         @relation(fields: [userId], references: [id])
   transactions Transaction[] // Many to many
 }
 
@@ -152,6 +156,7 @@ enum TransactionAction {
 
 // Subscription enums
 enum subscriptionPeriod {
+  ONETIME
   MONTHLY
   QUARTERLY
   HALF_YEARLY
