@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { addAccount, getAccounts } from '../db/account.js'
+import config from 'config'
 
 export const get = async (_req: Request, res: Response) => {
   try {
@@ -7,15 +8,12 @@ export const get = async (_req: Request, res: Response) => {
     const response = await getAccounts(id)
     return res.send({
       success: true,
-      data: response,
       message: 'Accounts fetched successfully',
+      data: response,
     })
   } catch (err) {
     console.log('ERR', err)
-    return res.send({
-      success: false,
-      error: err,
-    })
+    return res.boom.badRequest('Failed to fetch accounts', { success: false, err })
   }
 }
 
@@ -28,8 +26,6 @@ export const add = async (req: Request, res: Response) => {
       type: body.type,
       balance: body.balance,
     }
-
-    console.log('Adding account: ', accountObject)
     const response = await addAccount(accountObject)
     return res.send({
       success: true,
@@ -38,9 +34,6 @@ export const add = async (req: Request, res: Response) => {
     })
   } catch (err) {
     console.log('ERR', err)
-    return res.send({
-      success: false,
-      error: err,
-    })
+    return res.boom.badRequest('Failed to add accounts', { success: false, err: JSON.stringify(err) })
   }
 }

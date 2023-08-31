@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import logger from '../utils/logger.js'
 import { getUserByEmail } from '../db/user.js'
+import config from 'config'
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -9,22 +10,22 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     if (typeof bearerHeader !== 'undefined') {
       const token = bearerHeader.split(' ')[1]
       try {
-        const data = jwt.verify(token, 'secret')
+        const secret: string = config.get('jwt.secret')
+        const data = jwt.verify(token, secret)
         if (typeof data === 'string') throw Error('Invalid token provided')
         const user = await getUserByEmail(data.email)
         res.locals = {
           user,
         }
       } catch (err) {
-        logger.error(err)
-        return res.boom.badData('Invalid token provided')
+        return res.boom.badRequest('Invalid token provided')
       }
       next()
     } else {
-      res.boom.badData('Token not provided')
+      res.boom.badRequest('Token not provided')
     }
   } catch (err) {
-    res.boom.badImplementation()
+    res.boom.badImplementation("It's on us.!", { success: false })
   }
 }
 
