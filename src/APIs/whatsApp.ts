@@ -1,5 +1,6 @@
 import process from 'process'
 import { default as axios } from 'axios'
+import config from 'config'
 
 export const handleWhatsAppCallback = async (prompt: string) => {
   try {
@@ -44,6 +45,7 @@ const _hitOpenAI = async (prompt: string) => {
     Remember to handle variations in user input and provide a clear JSON output for each message.
     ${prompt}`
 
+  const base: string = config.get('openAI.base')
   const data = JSON.stringify({
     model: 'gpt-3.5-turbo',
     messages: [
@@ -58,16 +60,16 @@ const _hitOpenAI = async (prompt: string) => {
     frequency_penalty: 0,
     presence_penalty: 0,
   })
-  const config = {
+  const payload = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: 'https://api.openai.com/v1/chat/completions',
+    url: `${base}/chat/completions`,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.TOKEN}`,
+      Authorization: 'Bearer' + config.get('openAI.token'),
     },
     data: data,
   }
 
-  return await axios.request(config)
+  return await axios.request(payload)
 }

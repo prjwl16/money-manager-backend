@@ -13,5 +13,5 @@ const WatsAppHandler = async (req: Request, res: Response) => {
   return res.sendStatus(200)
 }
 
-whatsApp.post('/callback/whatsApp', WatsAppHandler)
+whatsApp.post('/', WatsAppHandler)
 export default whatsApp

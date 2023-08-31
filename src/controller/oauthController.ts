@@ -3,9 +3,10 @@ import { createToken } from '../middleware/jwt'
 import axios from 'axios'
 import { createUser, getUserByEmail, updateUser } from '../db/user'
 import { getCurrentUser } from '../APIs/splitwise/user'
+import config from 'config'
 
-const SERVER_URL = process.env.SERVER_URL
-const FRONTEND_URL = process.env.FRONTEND_URL
+const FRONTEND_URL: string = config.get('frontend')
+const host: string = config.get('host')
 
 export const handleGoogleCallBack = async (req: Request, res: Response) => {
   //create jwt token
@@ -18,32 +19,37 @@ export const handleGoogleCallBack = async (req: Request, res: Response) => {
 }
 
 export const handleSplitwiseCallBack = async (req: Request, res: Response) => {
-  const code = req.query.code
+  try {
+    const code = req.query.code
 
-  const clientId = process.env.SPLITWISE_CONSUMER_KEY || ''
-  const clientSecret = process.env.SPLITWISE_CONSUMER_SECRET || ''
-  const redirectUri = (SERVER_URL || '') + process.env.SPLITWISE_CALLBACK_PATH
-  const swTokenUrl = process.env.SPLITWISE_TOKEN_URL || ''
+    const clientId: string = config.get('sw.consumerKey')
+    const clientSecret: string = config.get('sw.consumerSecret')
+    const redirectUri: string = host + config.get('sw.callbackPath')
+    const swTokenUrl: string = config.get('sw.tokenUrl')
 
-  const tokenResponse = await axios.post(swTokenUrl, null, {
-    params: {
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-      code: code,
-    },
-  })
+    const tokenResponse = await axios.post(swTokenUrl, null, {
+      params: {
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+        code: code,
+      },
+    })
 
-  const { access_token } = tokenResponse.data
-  const user = await handleSplitwiseUserCreation(access_token)
+    const { access_token } = tokenResponse.data
+    const user = await handleSplitwiseUserCreation(access_token)
 
-  if (user) {
-    const token = createToken(user.id, user.email, user.phone, user.role)
-    res.redirect(`${FRONTEND_URL}?token=${token}`)
+    if (user) {
+      const token = createToken(user.id, user.email, user.phone, user.role)
+      res.redirect(`${FRONTEND_URL}?token=${token}`)
+    }
+
+    res.redirect(`${FRONTEND_URL}/failed`)
+  } catch (err) {
+    console.log('ERR handling splitwise callback', err)
+    res.redirect(`${FRONTEND_URL}/failed`)
   }
-
-  res.redirect(`${FRONTEND_URL}/failed`)
 }
 
 const handleSplitwiseUserCreation = async (accessToken: string) => {

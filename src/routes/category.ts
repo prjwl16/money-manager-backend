@@ -5,6 +5,6 @@ import { verifyToken } from '../middleware/jwt.js'
 const router = Router()
 
 router.get('/', verifyToken, fetch)
-router.post('/add', verifyToken, add)
+router.post('/', verifyToken, add)
 
 export { router as categoryRouter }

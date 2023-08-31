@@ -1,6 +1,4 @@
 import express from 'express'
-const baseRouter = express()
-import authRouter from './auth.js'
 import whatsApp from './whatsAppBot.js'
 import { googleRouterAuth } from './oauthGoogle.js'
 import { userRouter } from './user.js'
@@ -12,16 +10,17 @@ import { transactionRouter } from './transaction.js'
 import { categoryRouter } from './category.js'
 import { accountRouter } from './account.js'
 
-baseRouter.use('/auth', authRouter)
-baseRouter.use('/oauth/google', googleRouterAuth)
-baseRouter.use('/oauth/splitwise', splitwiseRouterAuth)
-baseRouter.use('/user', userRouter)
-baseRouter.use('/api/splitwise', verifyToken, splitwiseRouter)
-baseRouter.use('/api/play', playgroundRouter)
-baseRouter.use('/api/user/txn', verifyToken, transactionRouter)
-baseRouter.use('/api/category', categoryRouter)
-baseRouter.use('/api/account', verifyToken, accountRouter)
+const router = express()
 
-baseRouter.use('/', whatsApp)
+router.use('/oauth/google', googleRouterAuth)
+router.use('/oauth/splitwise', splitwiseRouterAuth)
+router.use('/api/play', playgroundRouter)
+router.use('/user', userRouter)
+router.use('/api/splitwise', verifyToken, splitwiseRouter)
+router.use('/api/user/txn', verifyToken, transactionRouter)
+router.use('/api/category', categoryRouter)
+router.use('/api/account', verifyToken, accountRouter)
 
-export { baseRouter }
+router.use('/whatsapp', whatsApp)
+
+export { router }
