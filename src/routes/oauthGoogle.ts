@@ -1,15 +1,14 @@
-import { Request, Response, Router } from 'express'
+import { Router } from 'express'
 import passport from 'passport'
-import { createToken } from '../middleware/jwt.js'
 import { handleGoogleCallBack } from '../controller/oauthController.js'
+import config from 'config'
 
 const router = Router()
 
-const SERVER_URL = process.env.SERVER_URL
-const FRONTEND_URL = process.env.FRONTEND_URL
+const host: string = config.get('host')
+const callBackPath: string = config.get('google.callbackPath')
 
-const successRedirectUrl = `${SERVER_URL}/oauth/google/success`
-const failedRedirectUrl = `${SERVER_URL}/oauth/google/failed`
+const failedRedirectUrl = host + callBackPath
 
 router.get('/', passport.authenticate('google'))
 

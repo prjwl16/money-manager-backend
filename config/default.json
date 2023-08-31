@@ -1,0 +1,25 @@
+{
+  "port": 3000,
+  "host": "http://localhost:3000",
+  "frontend": "http://localhost:5173",
+  "jwt": {
+    "secret": "LOCALSECRETFORJWT",
+    "expiresIn": "90d"
+  },
+  "database": {
+    "url": "postgresql://<user>:<password>@localhost:5432/<db>"
+  },
+  "google": {
+    "clientID": "clientID",
+    "clientSecret": "clientSecret",
+    "callbackPath": "/oauth/google/callback"
+  },
+  "sw": {
+    "consumerKey": "consumerKey",
+    "consumerSecret": "consumerSecret",
+    "callbackPath": "/oauth/splitwise/callback",
+    "tokenUrl": "https://secure.splitwise.com/oauth/token",
+    "authUrl": "https://secure.splitwise.com/oauth/authorize",
+    "base": "https://secure.splitwise.com/api/v3.0"
+  }
+}

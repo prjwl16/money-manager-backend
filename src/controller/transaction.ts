@@ -1,11 +1,9 @@
 import { Request, Response } from 'express'
 import { fetchTransactionOfUser } from '../db/user.js'
 import { addSubscription } from '../db/transaction.js'
-import { getAccountByName } from '../db/account.js'
-import { getGroupByName } from '../db/group.js'
 
 export const get = async (req: Request, res: Response) => {
-  let response: Record<any, any> = {}
+  const response: Record<any, any> = {}
   const { id } = res.locals.user
   try {
     console.log('Fetching transaction of user: ', id)
