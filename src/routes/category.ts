@@ -1,10 +1,9 @@
 import { Router } from 'express'
-import { add, fetch } from '../controller/category.js'
-import { verifyToken } from '../middleware/jwt.js'
+import { add, get } from '../controller/category.js'
 
 const router = Router()
 
-router.get('/', verifyToken, fetch)
-router.post('/', verifyToken, add)
+router.get('/', get)
+router.post('/', add)
 
 export { router as categoryRouter }

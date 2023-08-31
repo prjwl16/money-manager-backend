@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { getUserByEmail } from '../db/user.js'
 
-const getUser = async (req: Request, res: Response) => {
+const get = async (req: Request, res: Response) => {
   try {
     const { email } = res.locals.user
     if (email) {
@@ -23,4 +23,4 @@ const getUser = async (req: Request, res: Response) => {
   return res.status(404).send({ message: 'User not found' })
 }
 
-export { getUser }
+export { get }

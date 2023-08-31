@@ -3,18 +3,13 @@ import { fetchTransactionOfUser } from '../db/user.js'
 import { addSubscription } from '../db/transaction.js'
 
 export const get = async (req: Request, res: Response) => {
-  const response: Record<any, any> = {}
-  const { id } = res.locals.user
   try {
-    console.log('Fetching transaction of user: ', id)
+    const { id } = res.locals.user
+    const response: Record<any, any> = {}
     response['transaction'] = await fetchTransactionOfUser(id)
     return res.send(response)
   } catch (err) {
-    console.log('ERR', err)
-    return res.send({
-      data: response,
-      error: err,
-    })
+    return res.boom.badRequest('Failed to get transactions', { success: false, err })
   }
 }
 
@@ -44,7 +39,6 @@ export const add = async (req: Request, res: Response) => {
 
   if (subscriptionObject.isSubscription && !subscriptionObject.plan) subscriptionObject.plan = 'MONTHLY'
 
-  console.log('Adding subscription: ', subscriptionObject)
   try {
     const response = await addSubscription(subscriptionObject)
     return res.send({
@@ -54,9 +48,6 @@ export const add = async (req: Request, res: Response) => {
     })
   } catch (err) {
     console.log('ERR', err)
-    return res.send({
-      success: false,
-      error: err,
-    })
+    return res.boom.badRequest('Failed to add subscription', { success: false })
   }
 }
