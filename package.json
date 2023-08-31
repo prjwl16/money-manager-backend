@@ -1,5 +1,5 @@
 {
-  "name": "sdn",
+  "name": "money-manager-backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
@@ -8,8 +8,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc & node dist/server.js",
     "dev": "tsc -w & nodemon dist/server.js",
-    "format": "",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx,json}'",
+    "lint:fix": "eslint --fix 'src/**/*.{js,jsx,ts,tsx,json}'",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "author": "Prjwl",
   "license": "ISC",
@@ -49,10 +51,14 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.48.0",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
     "nodemon": "^3.0.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^3.12.7"
-  }
+  },
+  "repository": "https://github.com/prjwl16/money-manager-backend.git"
 }

@@ -29,13 +29,13 @@ interface transaction {
   date: Date
 }
 
-let userId = 'ead9c725-55f6-4cfa-b27b-c2632f32480f'
-let accountId = '14e7a172-ffa3-4184-bc8b-cc27a546b804'
-let groupId = '045b2fdb-9789-4492-b5fb-1ccdbc710533'
-let categoryId = '7f03ef5b-c3cd-486a-b87a-d5a779174e8d'
+const userId = 'ead9c725-55f6-4cfa-b27b-c2632f32480f'
+const accountId = '14e7a172-ffa3-4184-bc8b-cc27a546b804'
+const groupId = '045b2fdb-9789-4492-b5fb-1ccdbc710533'
+const categoryId = '7f03ef5b-c3cd-486a-b87a-d5a779174e8d'
 
-router.get('/add', async (req, res) => {
-  let response: Record<any, any> = {}
+router.get('/add', async (_req, res) => {
+  const response: Record<any, any> = {}
 
   try {
     response['transaction'] = addTransaction()
@@ -50,7 +50,7 @@ router.get('/add', async (req, res) => {
 })
 
 router.get('/fetch', async (req, res) => {
-  let response: Record<any, any> = {}
+  const response: Record<any, any> = {}
 
   try {
     response['transaction'] = await fetchTransaction()

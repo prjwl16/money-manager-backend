@@ -4,7 +4,7 @@ let Completion
 Prompt = 'I bought tomatoes of 50 rs today.'
 Completion = { amount: 50, currency: 'INR', particular: 'tomato', date: '09-08-2023', errors: [] }
 
-Prompt: 'spent 1000 on movie tickets yesterday.'
+Prompt = 'spent 1000 on movie tickets yesterday.'
 Completion = {
   amount: 1000,
   currency: 'INR',
@@ -63,3 +63,6 @@ Completion = { amount: 30000, currency: 'INR', action: 'income', particular: 'sa
 
 Prompt = 'received my salary 30k yesterday'
 Completion = { amount: 30000, currency: 'INR', action: 'income', particular: 'salary', date: '08-08-2023', errors: [] }
+
+console.log('prompt: ', prompt)
+console.log('Completion: ', Completion)
