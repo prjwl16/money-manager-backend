@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { addAccount, getAccounts } from '../db/account.js'
 
-export const get = async (req: Request, res: Response) => {
+export const get = async (_req: Request, res: Response) => {
   try {
     const { id } = res.locals.user
     const response = await getAccounts(id)
