@@ -1,4 +1,3 @@
-import process from 'process'
 import { default as axios } from 'axios'
 import config from 'config'
 

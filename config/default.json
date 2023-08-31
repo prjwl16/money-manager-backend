@@ -14,7 +14,7 @@
     "clientSecret": "clientSecret",
     "callbackPath": "/oauth/google/callback"
   },
-  "sw":{
+  "sw": {
     "consumerKey": "consumerKey",
     "consumerSecret": "consumerSecret",
     "callbackPath": "/oauth/splitwise/callback",
