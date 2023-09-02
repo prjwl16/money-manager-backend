@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { getUserByEmail } from '../db/user.js'
+import { getUserByEmail, markDone } from '../db/user.js'
 
-const get = async (req: Request, res: Response) => {
+export const get = async (_req: Request, res: Response) => {
   try {
     const { email } = res.locals.user
     if (email) {
@@ -14,13 +14,27 @@ const get = async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
         avatar: user.avatar,
+        doneSetup: user.doneSetup,
       }
       return res.send(response)
     }
   } catch (err) {
-    console.log(err)
+    return res.boom.badRequest('User not found', { success: false })
   }
-  return res.status(404).send({ message: 'User not found' })
+  return res.boom.badRequest('User not found', { success: false })
 }
 
-export { get }
+export const constMarkDone = async (_req: Request, res: Response) => {
+  const { id } = res.locals.user
+  try {
+    await markDone(id)
+    return res.send({
+      success: true,
+      message: 'User marked done successfully',
+      data: {},
+    })
+  } catch (err) {
+    console.log(err)
+    return res.boom.badRequest('Failed to mark done', { success: false, err })
+  }
+}

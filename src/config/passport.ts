@@ -3,6 +3,7 @@ import strategy from 'passport-google-oauth20'
 import { createUser, getUserByEmail } from '../db/user.js'
 import config from 'config'
 import logger from '../utils/logger.js'
+import { Prisma } from '@prisma/client'
 
 try {
   const GoogleStrategy = strategy.Strategy
@@ -20,13 +21,13 @@ try {
         passReqToCallback: true,
         scope: ['profile', 'email'],
       },
-      async function (req, accessToken, refreshToken, profile, done) {
+      async function (_req, _accessToken, _refreshToken, profile, done) {
         if (!profile._json.email) return done(null, false)
 
         const user = await getUserByEmail(profile._json.email)
         if (user) return done(null, user)
 
-        const userObjectFromGoogle = {
+        const userObjectFromGoogle: Prisma.UserCreateInput = {
           googleId: profile.id,
           email: profile._json.email,
           firstName: profile._json.given_name,

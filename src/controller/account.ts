@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import { addAccount, getAccounts } from '../db/account.js'
-import config from 'config'
+import { addAccounts, getAccounts } from '../db/account.js'
+import { Prisma } from '@prisma/client'
 
 export const get = async (_req: Request, res: Response) => {
   try {
@@ -20,13 +20,23 @@ export const get = async (_req: Request, res: Response) => {
 export const add = async (req: Request, res: Response) => {
   try {
     const body = req.body
-    const accountObject = {
-      name: body.name,
-      userId: res.locals.user.id,
-      type: body.type,
-      balance: body.balance,
+    const accountObject: Prisma.AccountCreateManyInput[] = []
+    if (body.length === 0) return res.boom.badRequest('No accounts to add', { success: false })
+    try {
+      body.forEach((account: any) => {
+        const item: Prisma.AccountCreateManyInput = {
+          name: account.name,
+          type: account.type,
+          balance: account.balance,
+          userId: res.locals.user.id,
+        }
+        accountObject.push(item)
+      })
+    } catch (err) {
+      console.log(err)
+      return res.boom.badRequest('Invalid data received', { success: false, err })
     }
-    const response = await addAccount(accountObject)
+    const response = await addAccounts(accountObject)
     return res.send({
       success: true,
       data: response,

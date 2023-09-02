@@ -20,8 +20,6 @@ const oauthRoutes = Router()
 oauthRoutes.use('/google', googleRouterAuth)
 oauthRoutes.use('/splitwise', splitwiseRouterAuth)
 
-oauthRoutes.use('/oauth', oauthRoutes)
-
 //Api and token
 const tokenRoutes = Router()
 tokenRoutes.use('/user', userRouter)
@@ -31,5 +29,6 @@ tokenRoutes.use('/category', categoryRouter)
 tokenRoutes.use('/account', accountRouter)
 
 router.use('/api', verifyToken, tokenRoutes)
+router.use('/oauth', oauthRoutes)
 
 export { router }

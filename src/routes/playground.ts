@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient({
   log: [{ level: 'query', emit: 'event' }],
@@ -11,28 +11,10 @@ prisma.$on('query', (e) => {
 
 const router = Router()
 
-interface Account {
-  name: string
-  type: 'CASH' | 'BANK' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'LOAN'
-  balance: number
-}
-interface Group {
-  name: string
-  description: string
-  createdBy: string
-}
-
-interface transaction {
-  particular: string
-  amount: number
-  type: 'INCOME' | 'EXPENSE'
-  date: Date
-}
-
-const userId = 'ead9c725-55f6-4cfa-b27b-c2632f32480f'
-const accountId = '14e7a172-ffa3-4184-bc8b-cc27a546b804'
-const groupId = '045b2fdb-9789-4492-b5fb-1ccdbc710533'
-const categoryId = '7f03ef5b-c3cd-486a-b87a-d5a779174e8d'
+const userId = 1
+const accountId = 1
+const groupId = 1
+const categoryId = 1
 
 router.get('/add', async (_req, res) => {
   const response: Record<any, any> = {}
@@ -82,9 +64,9 @@ const fetchTransaction = async () => {
 }
 
 const addTransaction = async () => {
-  const transaction: transaction = {
+  const transaction: Prisma.TransactionCreateInput = {
     type: 'EXPENSE',
-    particular: 'Mehenga transaction',
+    name: 'Mehenga transaction',
     amount: 100000,
     date: new Date(),
   }
@@ -93,7 +75,7 @@ const addTransaction = async () => {
     .create({
       data: {
         type: 'EXPENSE',
-        particular: transaction.particular,
+        name: transaction.name,
         amount: transaction.amount,
         date: transaction.date,
         accountId: accountId,
@@ -121,17 +103,15 @@ const addTransaction = async () => {
 }
 
 const addAccount = async () => {
-  const account: Account = {
+  const account: Prisma.AccountCreateInput = {
     name: 'test',
     type: 'CREDIT_CARD',
     balance: 1000,
+    user: { connect: { id: userId } },
   }
   await prisma.account
     .create({
-      data: {
-        ...account,
-        user: { connect: { id: userId } },
-      },
+      data: account,
     })
     .then((data) => {
       console.log('account', data)
@@ -143,8 +123,7 @@ const addCategory = async () => {
   await prisma.category
     .create({
       data: {
-        title: 'test',
-        description: 'test',
+        name: 'test',
       },
     })
     .then((data) => {
@@ -154,12 +133,17 @@ const addCategory = async () => {
 }
 
 const addGroup = async () => {
-  const group: Group = {
-    name: 'test',
-    description: 'test',
-    createdBy: userId,
+  const group: Prisma.GroupCreateInput = {
+    name: 'Personal',
+    description: 'Personal transactions',
+    isDefault: true,
+    createdByUser: {
+      connect: {
+        id: userId,
+      },
+    },
   }
-  await prisma.groups
+  await prisma.group
     .create({
       data: {
         ...group,

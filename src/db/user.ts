@@ -1,5 +1,6 @@
 import prisma from '../../prisma/client.js'
 import bcrypt from 'bcrypt'
+import { Prisma } from '@prisma/client'
 
 const User = prisma.user
 
@@ -25,9 +26,8 @@ export const getUserByPhone = async (phone: string) => {
   return User.findUnique({ where: { phone } })
 }
 
-export const createUser = async (user: UserData) => {
+export const createUser = async (user: Prisma.UserCreateInput) => {
   console.log('~ Creating user: ', user)
-  if (user.password) user.password = await _getHashedPassword(user.password)
   return User.create({ data: user })
 }
 
@@ -43,14 +43,18 @@ export const authenticate = async (userPassword: string, dbPassword: string) => 
   return await bcrypt.compare(userPassword, dbPassword)
 }
 
-export const updateUser = async (updateQuery: updateQuery, user: UserData) => {
+export const updateUser = async (updateQuery: updateQuery, user: Prisma.UserCreateInput) => {
   console.log('~ Updating user: ', user)
   if (updateQuery.email) return User.update({ where: { email: updateQuery.email }, data: user })
   else return User.update({ where: { phone: updateQuery.phone }, data: user })
 }
 
+export const markDone = async (userId: number) => {
+  return User.update({ where: { id: userId }, data: { doneSetup: true } })
+}
+
 //Transaction of a user
-export const fetchTransactionOfUser = async (userId: string) => {
+export const fetchTransactionOfUser = async (userId: number) => {
   return User.findUnique({
     where: { id: userId },
     select: {
@@ -68,7 +72,7 @@ export const fetchTransactionOfUser = async (userId: string) => {
               type: true,
               currency: true,
               accountId: true,
-              particular: true,
+              name: true,
               active: true,
             },
           },
