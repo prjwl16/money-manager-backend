@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { getUserByEmail, updateNewUserSetup } from '../db/user.js'
-import { addAccounts } from '../db/account.ts'
+import { addAccount } from '../db/account.ts'
 import { Prisma } from '@prisma/client'
 import prisma from '../../prisma/client.ts'
 import { createGroup } from '../db/group.ts'
@@ -30,7 +30,6 @@ export const get = async (_req: Request, res: Response) => {
 
 export const newUserSetUp = async (req: Request, res: Response) => {
   const { id } = res.locals.user
-  console.log('Here: ', req.body)
   try {
     prisma
       .$transaction(async () => {
@@ -40,8 +39,9 @@ export const newUserSetUp = async (req: Request, res: Response) => {
           type: 'BANK',
           balance: balance || 0,
           isDefault: true,
+          user: { connect: { id: id } },
         }
-        await addAccounts([accountObject])
+        await addAccount(accountObject)
         const user = await updateNewUserSetup(id)
 
         const { name, description } = req.body.group
