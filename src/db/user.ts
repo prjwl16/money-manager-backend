@@ -11,7 +11,9 @@ interface updateQuery {
 
 export const getUserByEmail = async (email: string) => {
   console.log('~ Finding user by email: ', email)
-  return User.findUnique({ where: { email } })
+  const user = User.findUnique({ where: { email } })
+  console.log('User found')
+  return user
 }
 export const getUserByPhone = async (phone: string) => {
   console.log('~ Finding user by phone: ', phone)
@@ -41,7 +43,7 @@ export const updateUser = async (updateQuery: updateQuery, user: Prisma.UserCrea
   else return User.update({ where: { phone: updateQuery.phone }, data: user })
 }
 
-export const markDone = async (userId: number) => {
+export const updateNewUserSetup = async (userId: number) => {
   return User.update({ where: { id: userId }, data: { doneSetup: true } })
 }
 

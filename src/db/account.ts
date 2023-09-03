@@ -12,3 +12,7 @@ export const addAccounts = async (accountObject: Prisma.AccountCreateManyInput[]
 export const getAccountByName = async (userId: number, name: string) => {
   return prisma.account.findMany({ where: { userId: userId, name: name } })
 }
+
+export const setDefaultAccount = async (accountId: number) => {
+  return prisma.account.update({ where: { id: accountId }, data: { isDefault: true } })
+}

@@ -109,10 +109,10 @@ model Group {
   updatedAt     DateTime       @updatedAt @db.Timestamp()
   // Relations
   transactions  Transaction[] // Many to many
-  userInGroups  userInGroups[] // Many to many
+  members       userInGroups[] // Many to many
   // User who created the group
-  createdBy     Int
-  createdByUser User?          @relation("createdBy", fields: [createdBy], references: [id])
+  admin         Int
+  createdByUser User           @relation("createdBy", fields: [admin], references: [id])
 }
 
 // Many to many tables

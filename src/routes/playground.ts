@@ -147,7 +147,7 @@ const addGroup = async () => {
     .create({
       data: {
         ...group,
-        userInGroups: {
+        members: {
           create: {
             userId: userId,
           },

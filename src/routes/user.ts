@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { constMarkDone, get } from '../controller/userController.js'
+import { get, newUserSetUp } from '../controller/userController.js'
 
 const router = Router()
 
 router.get('/', get)
-router.patch('/mark-done', constMarkDone)
+router.patch('/setup', newUserSetUp)
 
 export { router as userRouter }
