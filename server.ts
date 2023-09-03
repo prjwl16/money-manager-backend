@@ -1,20 +1,14 @@
 import 'dotenv/config'
 import express from 'express'
-import logger from './src/utils/logger.js'
-import { router } from './src/routes/index.js'
+import { router } from './src/routes'
 import './src/config/passport.js'
-import { Middlewares } from './src/middleware/index.js'
 import config from 'config'
-
-//Add global variables
-// @ts-ignore
-global.logger = logger
-// @ts-ignore
-global.config = config
+import { Middlewares } from './src/middleware'
 
 //Initiate express app
 const app = express()
 const port: number = config.get('port')
+
 //All middlewares
 Middlewares(app)
 
@@ -24,6 +18,8 @@ app.get('/', async (_req, res) => {
 })
 
 app.use(router)
+
+//Remove all locals
 app.listen(port, () => {
   console.log(`App listening on ${port} in ${process.env.NODE_ENV} mode`)
 })

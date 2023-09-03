@@ -1,14 +1,18 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
-export const getAccounts = async (userId: string) => {
+export const getAccounts = async (userId: number) => {
   return prisma.account.findMany({ where: { userId: userId } })
 }
 
-export const addAccount = async (accountObject: any) => {
-  return prisma.account.create({ data: accountObject })
+export const addAccounts = async (accountObject: Prisma.AccountCreateManyInput[]) => {
+  return prisma.account.createMany({ data: accountObject })
 }
 
-export const getAccountByName = async (name: string) => {
-  return prisma.account.findUnique({ where: { name: name } })
+export const getAccountByName = async (userId: number, name: string) => {
+  return prisma.account.findMany({ where: { userId: userId, name: name } })
+}
+
+export const setDefaultAccount = async (accountId: number) => {
+  return prisma.account.update({ where: { id: accountId }, data: { isDefault: true } })
 }

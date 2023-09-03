@@ -1,13 +1,10 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
-const addCategory = async (categoryObj: any) => {
+export const addCategory = async (category: Prisma.CategoryCreateInput) => {
   return prisma.category
     .create({
-      data: {
-        title: categoryObj.title,
-        userId: categoryObj.userId,
-      },
+      data: category,
     })
     .catch((err) => {
       console.log('ERR', err)
@@ -15,8 +12,11 @@ const addCategory = async (categoryObj: any) => {
     })
 }
 
-const getCategory = async (userId: string) => {
-  return prisma.category.findMany({ where: { userId: userId } })
+export const getCategory = async (userId: number, page: number) => {
+  if (page) return prisma.category.findMany({ skip: (page - 1) * 10, take: 10, where: { userId: userId } })
+  return prisma.category.findMany({ where: { isDefault: true }, select: { id: true, name: true } })
 }
 
-export { addCategory, getCategory }
+export const addManyCategories = async (categories: Prisma.CategoryCreateInput[]) => {
+  return prisma.category.createMany({ data: categories })
+}

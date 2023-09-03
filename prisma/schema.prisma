@@ -10,44 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Use auto increment for id
 model User {
-  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  firstName            String?
-  lastName             String?
-  phone                String?               @unique
-  email                String?               @unique
-  password             String?
-  role                 UserRole              @default(USER)
-  createdAt            DateTime              @default(now()) @db.Timestamp()
-  updatedAt            DateTime              @updatedAt @db.Timestamp()
-  googleId             String?               @unique
-  secret               String?               @unique
-  avatar               String?
-  splitwiseUserId      Int?                  @unique
-  splitwiseAccessToken String?
+  id                  Int                   @id @default(autoincrement())
+  firstName           String?
+  lastName            String?
+  phone               String?               @unique
+  email               String?               @unique
+  role                UserRole              @default(USER)
+  createdAt           DateTime              @default(now()) @db.Timestamp()
+  updatedAt           DateTime              @updatedAt @db.Timestamp()
+  googleId            String?               @unique
+  avatar              String?
+  swUserId            Int?                  @unique
+  swAccessToken       String?
+  doneSetup           Boolean               @default(false)
   // Relations
-  accounts             Account[] // One to many
-  userInGroups         userInGroups[] // Many to many
-  usersInTransactions  usersInTransactions[] // Many to many
-  transactionPaid      Transaction[]         @relation("PaidBy")
-  transactionCreated   Transaction[]         @relation("CreatedBy")
-  groups               groups[]              @relation("createdBy")
-  Category             Category[]
+  // One to many
+  accounts            Account[]
+  paidBy              Transaction[]         @relation("PaidBy")
+  createdBy           Transaction[]         @relation("CreatedBy")
+  groups              Group[]               @relation("createdBy")
+  Category            Category[]
+  // Many to many
+  userInGroups        userInGroups[]
+  usersInTransactions usersInTransactions[]
 }
 
 model Transaction {
-  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  id                    Int                   @id @default(autoincrement())
   type                  TransactionAction     @default(EXPENSE)
   amount                Float
   currency              currency              @default(INR)
-  particular            String? // title | name
+  name                  String?
   description           String?
   date                  DateTime?
   place                 String?
   createdAt             DateTime              @default(now()) @db.Timestamp()
   updatedAt             DateTime              @updatedAt @db.Timestamp()
   // Subscription
-  logo                  String?
   isSubscription        Boolean               @default(false)
   active                Boolean               @default(true)
   plan                  subscriptionPeriod    @default(ONETIME)
@@ -57,71 +58,69 @@ model Transaction {
   swExpenseId           Int?                  @unique
   swGroupId             Int?                  @unique
   // Relations
-  accountId             String                @db.Uuid() // Many to one
-  account               Account               @relation(fields: [accountId], references: [id])
-  categoryId            String                @db.Uuid() // Many to one
-  category              Category              @relation(fields: [categoryId], references: [id])
-  groupId               String?               @db.Uuid() // Many to one
-  groups                groups?               @relation(fields: [groupId], references: [id])
+  accountId             Int? // Many to one
+  account               Account?              @relation(fields: [accountId], references: [id])
+  categoryId            Int // Many to one
+  category              Category?             @relation(fields: [categoryId], references: [id])
+  groupId               Int? // Many to one
+  groups                Group?                @relation(fields: [groupId], references: [id])
   usersInTransactions   usersInTransactions[] // Many to many
-  paidById              String?               @db.Uuid()
-  createdById           String?               @db.Uuid()
-  updatedByIds          String[]              @db.Uuid()
-
-  paidBy    User? @relation("PaidBy", fields: [paidById], references: [id])
-  createdBy User? @relation("CreatedBy", fields: [createdById], references: [id])
+  paidById              Int
+  createdById           Int
+  updatedByIds          Int[]
+  paidBy                User?                 @relation("PaidBy", fields: [paidById], references: [id])
+  createdBy             User?                 @relation("CreatedBy", fields: [createdById], references: [id])
 }
 
 model Account {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
-  name        String        @unique
+  id          Int           @id @default(autoincrement())
+  name        String
   type        AccountType   @default(CASH)
-  balance     Float
+  balance     Float         @default(0)
+  isDefault   Boolean       @default(false)
   createdAt   DateTime      @default(now()) @db.Timestamp()
   updatedAt   DateTime      @updatedAt @db.Timestamp()
   // Relations
-  userId      String        @db.Uuid() // Many to one
-  user        User          @relation(fields: [userId], references: [id])
+  userId      Int? // Many to one
+  user        User?         @relation(fields: [userId], references: [id])
   transaction Transaction[] // Many to many
 }
 
-// TODO Add user id
 model Category {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+  id           Int           @id @default(autoincrement())
   swId         Int?          @unique
-  title        String
-  description  String?
+  name         String
+  isDefault    Boolean       @default(false)
   createdAt    DateTime      @default(now()) @db.Timestamp()
   updatedAt    DateTime      @updatedAt @db.Timestamp()
   // Relations
-  userId       String?       @db.Uuid() // Many to one
+  userId       Int? // Many to one
   user         User?         @relation(fields: [userId], references: [id])
   transactions Transaction[] // Many to many
 }
 
-// TODO: Add subcategoryes
-
-model groups {
-  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid()
+model Group {
+  id            Int            @id @default(autoincrement())
   name          String?
   description   String?
-  logo          String?
+  avatar        String?
+  isDefault     Boolean        @default(false)
   createdAt     DateTime       @default(now()) @db.Timestamp()
   updatedAt     DateTime       @updatedAt @db.Timestamp()
   // Relations
   transactions  Transaction[] // Many to many
-  userInGroups  userInGroups[] // Many to many
+  members       userInGroups[] // Many to many
   // User who created the group
-  createdBy     String?        @db.Uuid()
-  createdByUser User?          @relation("createdBy", fields: [createdBy], references: [id])
+  admin         Int
+  createdByUser User           @relation("createdBy", fields: [admin], references: [id])
 }
 
 // Many to many tables
 model userInGroups {
   user      User     @relation(fields: [userId], references: [id])
-  userId    String   @db.Uuid()
-  groups    groups   @relation(fields: [groupId], references: [id])
-  groupId   String   @db.Uuid()
+  userId    Int
+  groups    Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
   createdAt DateTime @default(now()) @db.Timestamp()
   updatedAt DateTime @updatedAt @db.Timestamp()
 
@@ -130,9 +129,9 @@ model userInGroups {
 
 model usersInTransactions {
   user          User        @relation(fields: [userId], references: [id])
-  userId        String      @db.Uuid()
+  userId        Int
   transaction   Transaction @relation(fields: [transactionId], references: [id])
-  transactionId String      @db.Uuid()
+  transactionId Int
   createdAt     DateTime    @default(now()) @db.Timestamp()
   updatedAt     DateTime    @updatedAt @db.Timestamp()
   // Splitwise
@@ -141,20 +140,20 @@ model usersInTransactions {
   @@id([userId, transactionId])
 }
 
-// User enums
+// Enums
+
 enum UserRole {
   USER
   ADMIN
 }
 
-// Transaction enums
 enum TransactionAction {
   INCOME
   EXPENSE
   SUBSCRIPTION
+  SELF_TRANSFER
 }
 
-// Subscription enums
 enum subscriptionPeriod {
   ONETIME
   MONTHLY
@@ -163,7 +162,6 @@ enum subscriptionPeriod {
   YEARLY
 }
 
-// Account enums
 enum AccountType {
   CASH
   BANK
@@ -172,7 +170,6 @@ enum AccountType {
   LOAN
 }
 
-// Comman enums
 enum currency {
   INR
   USD

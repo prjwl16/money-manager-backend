@@ -1,9 +1,10 @@
 import { Request, Response } from 'express'
-import { createToken } from '../middleware/jwt'
-import axios from 'axios'
-import { createUser, getUserByEmail, updateUser } from '../db/user'
-import { getCurrentUser } from '../APIs/splitwise/user'
 import config from 'config'
+import { createToken } from '../middleware/jwt.ts'
+import axios from 'axios'
+import { createUser, getUserByEmail, updateUser } from '../db/user.ts'
+import { getCurrentUser } from '../APIs/splitwise/user.ts'
+import { Prisma } from '@prisma/client'
 
 const FRONTEND_URL: string = config.get('frontend')
 const host: string = config.get('host')
@@ -68,22 +69,22 @@ const handleSplitwiseUserCreation = async (accessToken: string) => {
 
     if (!user) {
       const swUser = response.data.user
-      const userObjFromSw = {
+      const userObjFromSw: Prisma.UserCreateInput = {
         email: email,
-        splitwiseUserId: swUser.id,
+        swUserId: swUser.id,
         firstName: swUser.first_name,
         lastName: swUser.last_name,
         avatar: swUser.picture.small,
-        splitwiseAccessToken: accessToken,
+        swAccessToken: accessToken,
       }
-      return await createUser(userObjFromSw).catch((err) => {
+      return await createUser(userObjFromSw).catch((err: any) => {
         console.log('Error creating new user from splitwise: ', err)
         return null
       })
     }
 
     //update user
-    return await updateUser({ email }, { splitwiseUserId: id, splitwiseAccessToken: accessToken }).catch((err) => {
+    return await updateUser({ email }, { swUserId: id, swAccessToken: accessToken }).catch((err: any) => {
       console.log('Error updating user from splitwise: ', err)
       return null
     })
