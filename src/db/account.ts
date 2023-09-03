@@ -9,6 +9,10 @@ export const addAccounts = async (accountObject: Prisma.AccountCreateManyInput[]
   return prisma.account.createMany({ data: accountObject })
 }
 
+export const addAccount = (account: Prisma.AccountCreateInput) => {
+  return prisma.account.create({ data: account })
+}
+
 export const getAccountByName = async (userId: number, name: string) => {
   return prisma.account.findMany({ where: { userId: userId, name: name } })
 }
