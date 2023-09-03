@@ -4,14 +4,6 @@ import { Prisma } from '@prisma/client'
 
 const User = prisma.user
 
-interface UserData {
-  email?: string
-  phone?: string
-  password?: string
-  splitwiseUserId?: number
-  splitwiseAccessToken?: string
-}
-
 interface updateQuery {
   email?: string
   phone?: string

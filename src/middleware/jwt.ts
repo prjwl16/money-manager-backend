@@ -12,11 +12,10 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
       const token = bearerHeader.split(' ')[1]
       try {
         const secret: string = config.get('jwt.secret')
-        console.log('token', token)
         const data = jwt.verify(token, secret)
         if (typeof data === 'string') throw Error('Invalid token provided')
-        console.log('data', data)
         const user = await getUserByEmail(data.email)
+        if (!user) throw Error('User not found')
         res.locals = {
           user,
         }
@@ -40,7 +39,6 @@ export const createToken = (id: number, email?: string | null, phone?: string | 
       role,
     }
     const secret: string = config.get('jwt.secret')
-    console.log('secret', secret)
     const token = jwt.sign(payload, secret, {
       expiresIn: '30d',
     })
