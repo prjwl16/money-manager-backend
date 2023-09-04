@@ -8,12 +8,7 @@ import config from 'config'
 
 export const Middlewares = (app: Express) => {
   app.use(boom())
-  app.use(
-    cors({
-      origin: config.get('frontend'),
-      credentials: true,
-    })
-  )
+  app.use(cors())
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use(cookieParser())

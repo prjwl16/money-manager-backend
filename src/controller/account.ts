@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { addAccounts, getAccountByName, getAccounts } from '../db/account.js'
 import { Prisma } from '@prisma/client'
-import logger from '../utils/logger.ts'
+import logger from '../utils/logger.js'
 
 export const get = async (_req: Request, res: Response) => {
   try {

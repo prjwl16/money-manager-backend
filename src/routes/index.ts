@@ -9,6 +9,7 @@ import { playgroundRouter } from './playground.js'
 import { transactionRouter } from './transaction.js'
 import { categoryRouter } from './category.js'
 import { accountRouter } from './account.js'
+import { groupRouter } from './group.js'
 
 const router = Router()
 
@@ -27,6 +28,7 @@ tokenRoutes.use('/splitwise', splitwiseRouter)
 tokenRoutes.use('/user/txn', transactionRouter)
 tokenRoutes.use('/category', categoryRouter)
 tokenRoutes.use('/account', accountRouter)
+tokenRoutes.use('/group', groupRouter)
 
 router.use('/api', verifyToken, tokenRoutes)
 router.use('/oauth', oauthRoutes)

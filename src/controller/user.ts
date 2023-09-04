@@ -1,9 +1,7 @@
 import { Request, Response } from 'express'
-import { getUserByEmail, updateNewUserSetup } from '../db/user.js'
-import { addAccount } from '../db/account.ts'
+import { getUserByEmail } from '../db/user.js'
 import { Prisma } from '@prisma/client'
-import prisma from '../../prisma/client.ts'
-import { createGroup } from '../db/group.ts'
+import prisma from '../../prisma/client.js'
 
 export const get = async (_req: Request, res: Response) => {
   try {
@@ -32,7 +30,7 @@ export const newUserSetUp = async (req: Request, res: Response) => {
   const { id } = res.locals.user
   try {
     prisma
-      .$transaction(async () => {
+      .$transaction(async (tx) => {
         const { accountName, balance } = req.body.account
         const accountObject: Prisma.AccountCreateInput = {
           name: accountName,
@@ -41,13 +39,29 @@ export const newUserSetUp = async (req: Request, res: Response) => {
           isDefault: true,
           user: { connect: { id: id } },
         }
-        await addAccount(accountObject)
-        const user = await updateNewUserSetup(id)
+        await tx.account.create({ data: accountObject })
+
+        const user = await tx.user.update({ where: { id: id }, data: { doneSetup: true } })
 
         const { name, description } = req.body.group
 
-        await createGroup(id, name, description)
-
+        await tx.group.create({
+          data: {
+            name: name,
+            description: description,
+            isDefault: true,
+            members: {
+              connect: {
+                id: id,
+              },
+            },
+            admin: {
+              connect: {
+                id: id,
+              },
+            },
+          },
+        })
         return res.send({
           success: true,
           data: user,
@@ -55,7 +69,7 @@ export const newUserSetUp = async (req: Request, res: Response) => {
         })
       })
       .catch((err) => {
-        console.log('Err: ', err)
+        console.log(err)
         throw Error('Failed to update DB' + err)
       })
   } catch (err) {

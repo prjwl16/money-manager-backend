@@ -50,11 +50,7 @@ const fetchTransaction = async () => {
   return await prisma.transaction
     .findMany({
       include: {
-        usersInTransactions: {
-          include: {
-            user: true,
-          },
-        },
+        User: true,
       },
     })
     .then((data) => {
@@ -71,6 +67,7 @@ const addTransaction = async () => {
     date: new Date(),
   }
 
+  //Personal transaction
   await prisma.transaction
     .create({
       data: {
@@ -79,21 +76,16 @@ const addTransaction = async () => {
         amount: transaction.amount,
         date: transaction.date,
         accountId: accountId,
-        paidById: userId,
-        createdById: userId,
-        updatedByIds: [userId],
         categoryId: categoryId,
-        usersInTransactions: {
+        groupId: groupId,
+        userId: userId,
+        userTransaction: {
           create: {
-            user: {
-              connect: {
-                id: userId,
-              },
-            },
+            userId: userId,
+            splitPaid: transaction.amount,
             splitShare: transaction.amount,
           },
         },
-        groupId: groupId,
       },
     })
     .then((data) => {
@@ -137,7 +129,7 @@ const addGroup = async () => {
     name: 'Personal',
     description: 'Personal transactions',
     isDefault: true,
-    createdByUser: {
+    admin: {
       connect: {
         id: userId,
       },
@@ -149,7 +141,7 @@ const addGroup = async () => {
         ...group,
         members: {
           create: {
-            userId: userId,
+            id: userId,
           },
         },
       },

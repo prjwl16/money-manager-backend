@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@prisma/client'
-import logger from '../utils/logger.ts'
+import logger from '../utils/logger.js'
 
 export const addCategories = () => {
   console.log('Adding categories')
