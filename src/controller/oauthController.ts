@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import config from 'config'
-import { createToken } from '../middleware/jwt.ts'
+import { createToken } from '../middleware/jwt.js'
 import axios from 'axios'
-import { createUser, getUserByEmail, updateUser } from '../db/user.ts'
-import { getCurrentUser } from '../APIs/splitwise/user.ts'
+import { createUser, getUserByEmail, updateUser } from '../db/user.js'
+import { getCurrentUser } from '../APIs/splitwise/user.js'
 import { Prisma } from '@prisma/client'
 
 const FRONTEND_URL: string = config.get('frontend')

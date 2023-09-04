@@ -12,10 +12,29 @@ export const createGroup = async (userId: number, name: string, description: str
       description: description,
       members: {
         create: {
-          userId: userId,
+          id: userId,
         },
       },
-      createdByUser: {
+      admin: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+  })
+}
+
+export const getGroupByUserId = async (userId: number) => {
+  return prisma.group.findFirst({ where: { members: { some: { id: userId } } } })
+}
+
+export const addUserToGroup = async (userId: number, groupId: number) => {
+  console.log('userId', userId)
+  console.log('groupId', groupId)
+  return prisma.group.update({
+    where: { id: groupId },
+    data: {
+      members: {
         connect: {
           id: userId,
         },

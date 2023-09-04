@@ -1,3 +1,3 @@
-import { addCategories } from './src/init/category.ts'
+import { addCategories } from './src/init/category.js'
 
 addCategories()

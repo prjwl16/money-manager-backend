@@ -41,14 +41,13 @@ export const add = async (req: Request, res: Response) => {
     },
     category: body.categoryId,
     account: body.accountId,
-    paidBy: id,
-    createdBy: id,
-    updatedByIds: [id],
-    usersInTransactions: {
+    userTransaction: {
       create: [
         {
           // userId: id //TODO: test this also
           user: id,
+          splitPaid: body.amount,
+          splitShare: body.amount,
         },
       ],
     },

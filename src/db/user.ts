@@ -48,30 +48,9 @@ export const updateNewUserSetup = async (userId: number) => {
 }
 
 //Transaction of a user
+//TODO: WIP
 export const fetchTransactionOfUser = async (userId: number) => {
   return User.findUnique({
     where: { id: userId },
-    select: {
-      usersInTransactions: {
-        where: { transaction: { isSubscription: true } },
-        select: {
-          userId: true,
-          transactionId: true,
-          transaction: {
-            select: {
-              id: true,
-              amount: true,
-              description: true,
-              date: true,
-              type: true,
-              currency: true,
-              accountId: true,
-              name: true,
-              active: true,
-            },
-          },
-        },
-      },
-    },
   })
 }
