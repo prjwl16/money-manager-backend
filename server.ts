@@ -2,7 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import './src/config/passport.js'
 import config from 'config'
-import { Middlewares } from './src/middleware'
+import { Middlewares } from './src/middleware/index.js'
 import { router } from './src/routes/index.js'
 
 //Initiate express app
