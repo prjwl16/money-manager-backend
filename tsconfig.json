@@ -4,9 +4,19 @@
     "moduleResolution": "nodenext",
     "target": "ES2022",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+
+    }
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "ts-node": {
     "esm": true
   }
