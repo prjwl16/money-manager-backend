@@ -2,7 +2,7 @@ import { body, check, ResultFactory, validationResult } from 'express-validator'
 import { NextFunction, Request, Response } from 'express'
 import { error } from 'winston'
 import { getUserByEmail, getUserByPhone } from '../../db/user.js'
-import { errors } from '../../../constants/errors.js'
+import { errors } from '../../constants/errors.js'
 
 export const addSignUpValidation = [
   // Express Validator checks go here

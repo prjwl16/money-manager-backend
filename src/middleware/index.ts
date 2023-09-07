@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser'
 import passport from 'passport'
 import morgan from 'morgan'
 import boom from 'express-boom'
-import config from 'config'
 
 export const Middlewares = (app: Express) => {
   app.use(boom())

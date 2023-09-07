@@ -1,7 +1,7 @@
+import config from 'config'
 import passport from 'passport'
 import strategy from 'passport-google-oauth20'
 import { createUser, getUserByEmail } from '../db/user.js'
-import config from 'config'
 import logger from '../utils/logger.js'
 import { Prisma } from '@prisma/client'
 
