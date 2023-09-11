@@ -6,7 +6,8 @@ import { createUser, getUserByEmail, updateUser } from '../db/user.js'
 import { getCurrentUser } from '../APIs/splitwise/user.js'
 import { Prisma } from '@prisma/client'
 
-const FRONTEND_URL: string = config.get('frontend')
+const FRONTEND_URL: URL = config.get('frontend.base')
+const TOKEN_REDIRECT: string = config.get('frontend.tokenRedirect')
 const host: string = config.get('host')
 
 export const handleGoogleCallBack = async (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ export const handleGoogleCallBack = async (req: Request, res: Response) => {
   if (req.user) {
     const user = JSON.parse(JSON.stringify(req.user))
     const token = createToken(user.id, user.email, user.phone, user.role)
-    res.redirect(`${FRONTEND_URL}?token=${token}`)
+    res.redirect(`${FRONTEND_URL + TOKEN_REDIRECT}?token=${token}`)
   }
   res.redirect(`${FRONTEND_URL}`)
 }
