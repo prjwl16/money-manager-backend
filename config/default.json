@@ -1,7 +1,11 @@
 {
   "port": 3000,
   "host": "http://localhost:3000",
-  "frontend": "http://localhost:5173",
+  "frontend": {
+    "base": "http://localhost:5173",
+    "tokenRedirect": "/login"
+  },
+  "loginPath": "/login",
   "jwt": {
     "secret": "LOCALSECRETFORJWT",
     "expiresIn": "90d"
