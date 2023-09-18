@@ -44,20 +44,18 @@ CREATE TABLE "Transaction" (
     "place" TEXT,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL,
-    "isSubscription" BOOLEAN NOT NULL DEFAULT false,
-    "active" BOOLEAN NOT NULL DEFAULT true,
-    "plan" "subscriptionPeriod" NOT NULL DEFAULT 'ONETIME',
-    "subscriptionStartDate" TIMESTAMP(3),
-    "subscriptionEndDate" TIMESTAMP(3),
+    "isRecurring" BOOLEAN NOT NULL DEFAULT false,
+    "recurringPeriod" "subscriptionPeriod" NOT NULL DEFAULT 'ONETIME',
+    "recurringPeriodCount" INTEGER DEFAULT 0,
+    "recurringStartDate" TIMESTAMP(3),
+    "recurringEndDate" TIMESTAMP(3),
     "swExpenseId" INTEGER,
     "swGroupId" INTEGER,
-    "accountId" INTEGER,
+    "accountId" INTEGER NOT NULL,
     "categoryId" INTEGER NOT NULL,
-    "groupId" INTEGER,
-    "paidById" INTEGER NOT NULL,
-    "createdById" INTEGER NOT NULL,
-    "updatedByIds" INTEGER[],
-    "userId" INTEGER,
+    "groupId" INTEGER NOT NULL,
+    "userGroupUserId" INTEGER,
+    "userGroupGroupId" INTEGER,
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
@@ -104,20 +102,27 @@ CREATE TABLE "Group" (
 );
 
 -- CreateTable
-CREATE TABLE "usersInTransactions" (
+CREATE TABLE "UserGroup" (
+    "userId" INTEGER NOT NULL,
+    "groupId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
+    "swUserId" INTEGER,
+    "swGroupId" INTEGER,
+
+    CONSTRAINT "UserGroup_pkey" PRIMARY KEY ("userId","groupId")
+);
+
+-- CreateTable
+CREATE TABLE "userTransaction" (
     "userId" INTEGER NOT NULL,
     "transactionId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL,
     "splitShare" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "splitPaid" DOUBLE PRECISION NOT NULL DEFAULT 0,
 
-    CONSTRAINT "usersInTransactions_pkey" PRIMARY KEY ("userId","transactionId")
-);
-
--- CreateTable
-CREATE TABLE "_members" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    CONSTRAINT "userTransaction_pkey" PRIMARY KEY ("userId","transactionId")
 );
 
 -- CreateIndex
@@ -141,29 +146,17 @@ CREATE UNIQUE INDEX "Transaction_swGroupId_key" ON "Transaction"("swGroupId");
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_swId_key" ON "Category"("swId");
 
--- CreateIndex
-CREATE UNIQUE INDEX "_members_AB_unique" ON "_members"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_members_B_index" ON "_members"("B");
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userGroupUserId_userGroupGroupId_fkey" FOREIGN KEY ("userGroupUserId", "userGroupGroupId") REFERENCES "UserGroup"("userId", "groupId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_paidById_fkey" FOREIGN KEY ("paidById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -175,13 +168,13 @@ ALTER TABLE "Category" ADD CONSTRAINT "Category_userId_fkey" FOREIGN KEY ("userI
 ALTER TABLE "Group" ADD CONSTRAINT "Group_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "usersInTransactions" ADD CONSTRAINT "usersInTransactions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserGroup" ADD CONSTRAINT "UserGroup_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "usersInTransactions" ADD CONSTRAINT "usersInTransactions_transactionId_fkey" FOREIGN KEY ("transactionId") REFERENCES "Transaction"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserGroup" ADD CONSTRAINT "UserGroup_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_members" ADD CONSTRAINT "_members_A_fkey" FOREIGN KEY ("A") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "userTransaction" ADD CONSTRAINT "userTransaction_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_members" ADD CONSTRAINT "_members_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "userTransaction" ADD CONSTRAINT "userTransaction_transactionId_fkey" FOREIGN KEY ("transactionId") REFERENCES "Transaction"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

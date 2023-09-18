@@ -28,44 +28,44 @@ model User {
   // Relations
   // One to many
   accounts        Account[]
-  Category        Category[]
+  categories      Category[]
   // Many to many
-  groups          Group[]           @relation("members")
-  transactions    Transaction[]
   userTransaction userTransaction[]
-  admins          Group[] // Many to many for admin
+  userGroup       UserGroup[]
+  adminIn         Group[]
 }
 
 model Transaction {
-  id                    Int                @id @default(autoincrement())
-  type                  TransactionAction  @default(EXPENSE)
-  amount                Float
-  currency              currency           @default(INR)
-  name                  String?
-  description           String?
-  date                  DateTime?
-  place                 String?
-  createdAt             DateTime           @default(now()) @db.Timestamp()
-  updatedAt             DateTime           @updatedAt @db.Timestamp()
-  // Subscription
-  isSubscription        Boolean            @default(false)
-  active                Boolean            @default(true)
-  plan                  subscriptionPeriod @default(ONETIME)
-  subscriptionStartDate DateTime?
-  subscriptionEndDate   DateTime?
+  id                   Int                @id @default(autoincrement())
+  type                 TransactionAction  @default(EXPENSE)
+  amount               Float
+  currency             currency           @default(INR)
+  name                 String?
+  description          String?
+  date                 DateTime?
+  place                String?
+  createdAt            DateTime           @default(now()) @db.Timestamp()
+  updatedAt            DateTime           @updatedAt @db.Timestamp()
+  // recurring
+  isRecurring          Boolean            @default(false)
+  recurringPeriod      subscriptionPeriod @default(ONETIME)
+  recurringPeriodCount Int?               @default(0)
+  recurringStartDate   DateTime?
+  recurringEndDate     DateTime?
   // Splitwise
-  swExpenseId           Int?               @unique
-  swGroupId             Int?               @unique
+  swExpenseId          Int?               @unique
+  swGroupId            Int?               @unique
   // Relations
-  accountId             Int? // Many to one
-  account               Account?           @relation(fields: [accountId], references: [id])
-  categoryId            Int // Many to one
-  category              Category?          @relation(fields: [categoryId], references: [id])
-  groupId               Int? // Many to one
-  groups                Group?             @relation(fields: [groupId], references: [id])
-  User                  User?              @relation(fields: [userId], references: [id])
-  userId                Int?
-  userTransaction       userTransaction[]
+  accountId            Int
+  categoryId           Int
+  groupId              Int
+  userGroupUserId      Int
+  userGroupGroupId     Int
+  userTransaction      userTransaction[]
+  UserGroup            UserGroup?         @relation(fields: [userGroupUserId, userGroupGroupId], references: [userId, groupId])
+  groups               Group?             @relation(fields: [groupId], references: [id])
+  category             Category?          @relation(fields: [categoryId], references: [id])
+  account              Account?           @relation(fields: [accountId], references: [id])
 }
 
 model Account {
@@ -79,8 +79,8 @@ model Account {
 
   // Relations
   userId      Int // Many to one
-  user        User?         @relation(fields: [userId], references: [id])
   transaction Transaction[] // Many to many
+  user        User?         @relation(fields: [userId], references: [id])
 }
 
 model Category {
@@ -92,8 +92,8 @@ model Category {
   updatedAt    DateTime      @updatedAt @db.Timestamp()
   // Relations
   userId       Int? // Many to one
-  user         User?         @relation(fields: [userId], references: [id])
   transactions Transaction[] // Many to many
+  user         User?         @relation(fields: [userId], references: [id])
 }
 
 model Group {
@@ -106,9 +106,25 @@ model Group {
   updatedAt    DateTime      @updatedAt @db.Timestamp()
   // Relations
   adminId      Int
-  admin        User          @relation(fields: [adminId], references: [id])
-  transactions Transaction[] // Many to many
-  members      User[]        @relation("members")
+  transactions Transaction[]
+  UserGroup    UserGroup[]
+
+  admin User @relation(fields: [adminId], references: [id])
+}
+
+model UserGroup {
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+  group       Group         @relation(fields: [groupId], references: [id])
+  groupId     Int
+  createdAt   DateTime      @default(now()) @db.Timestamp()
+  updatedAt   DateTime      @updatedAt @db.Timestamp()
+  // Splitwise
+  swUserId    Int?
+  swGroupId   Int?
+  transaction Transaction[]
+
+  @@id([userId, groupId])
 }
 
 model userTransaction {
@@ -125,6 +141,11 @@ model userTransaction {
   @@id([userId, transactionId])
 }
 
+//
+//
+//
+//
+//
 // Enums
 enum UserRole {
   USER

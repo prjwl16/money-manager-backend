@@ -10,9 +10,9 @@ export const createGroup = async (userId: number, name: string, description: str
     data: {
       name: name,
       description: description,
-      members: {
+      UserGroup: {
         create: {
-          id: userId,
+          userId: userId,
         },
       },
       admin: {
@@ -25,7 +25,7 @@ export const createGroup = async (userId: number, name: string, description: str
 }
 
 export const getGroupByUserId = async (userId: number) => {
-  return prisma.group.findFirst({ where: { members: { some: { id: userId } } } })
+  return prisma.group.findFirst({ where: { UserGroup: { some: { userId: userId } } } })
 }
 
 export const addUserToGroup = async (userId: number, groupId: number) => {
@@ -34,9 +34,9 @@ export const addUserToGroup = async (userId: number, groupId: number) => {
   return prisma.group.update({
     where: { id: groupId },
     data: {
-      members: {
-        connect: {
-          id: userId,
+      UserGroup: {
+        create: {
+          userId: userId,
         },
       },
     },
