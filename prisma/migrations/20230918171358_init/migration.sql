@@ -54,8 +54,8 @@ CREATE TABLE "Transaction" (
     "accountId" INTEGER NOT NULL,
     "categoryId" INTEGER NOT NULL,
     "groupId" INTEGER NOT NULL,
-    "userGroupUserId" INTEGER,
-    "userGroupGroupId" INTEGER,
+    "userGroupUserId" INTEGER NOT NULL,
+    "userGroupGroupId" INTEGER NOT NULL,
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
@@ -147,7 +147,7 @@ CREATE UNIQUE INDEX "Transaction_swGroupId_key" ON "Transaction"("swGroupId");
 CREATE UNIQUE INDEX "Category_swId_key" ON "Category"("swId");
 
 -- AddForeignKey
-ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userGroupUserId_userGroupGroupId_fkey" FOREIGN KEY ("userGroupUserId", "userGroupGroupId") REFERENCES "UserGroup"("userId", "groupId") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_userGroupUserId_userGroupGroupId_fkey" FOREIGN KEY ("userGroupUserId", "userGroupGroupId") REFERENCES "UserGroup"("userId", "groupId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -30,26 +30,24 @@ const UserModule = {
     const response: Record<any, any> = {}
     try {
       const { id } = res.locals.user
-      const user = await prisma.user.update({
+
+      const userData = await prisma.user.findUnique({
         where: {
           id,
         },
-        data: {
-          doneSetup: true,
-        },
       })
 
-      if (user.doneSetup) {
+      if (userData.doneSetup) {
         return res.send({
           success: true,
           data: {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            avatar: user.avatar,
-            doneSetup: user.doneSetup,
+            id: userData.id,
+            email: userData.email,
+            role: userData.role,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            avatar: userData.avatar,
+            doneSetup: userData.doneSetup,
           },
           error: null,
         })
@@ -101,6 +99,15 @@ const UserModule = {
         response['shared'] = shared
         response['account'] = account
         response['categories'] = categories
+      })
+
+      const user = await prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          doneSetup: true,
+        },
       })
 
       return res.send({
