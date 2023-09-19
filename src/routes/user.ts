@@ -93,6 +93,7 @@ const UserModule = {
 
         const categories = await txn.category.createMany({
           data: defaultCategories,
+          skipDuplicates: true,
         })
 
         response['personal'] = personal

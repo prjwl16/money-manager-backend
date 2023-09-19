@@ -33,6 +33,7 @@ model User {
   userTransaction userTransaction[]
   userGroup       UserGroup[]
   adminIn         Group[]
+  Transaction     Transaction[]
 }
 
 model Transaction {
@@ -56,13 +57,12 @@ model Transaction {
   swExpenseId          Int?               @unique
   swGroupId            Int?               @unique
   // Relations
+  createdBy            Int
+  createdByUser        User               @relation(fields: [createdBy], references: [id])
   accountId            Int
   categoryId           Int
   groupId              Int
-  userGroupUserId      Int
-  userGroupGroupId     Int
   userTransaction      userTransaction[]
-  UserGroup            UserGroup?         @relation(fields: [userGroupUserId, userGroupGroupId], references: [userId, groupId])
   groups               Group?             @relation(fields: [groupId], references: [id])
   category             Category?          @relation(fields: [categoryId], references: [id])
   account              Account?           @relation(fields: [accountId], references: [id])
@@ -113,16 +113,15 @@ model Group {
 }
 
 model UserGroup {
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int
-  group       Group         @relation(fields: [groupId], references: [id])
-  groupId     Int
-  createdAt   DateTime      @default(now()) @db.Timestamp()
-  updatedAt   DateTime      @updatedAt @db.Timestamp()
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
+  createdAt DateTime @default(now()) @db.Timestamp()
+  updatedAt DateTime @updatedAt @db.Timestamp()
   // Splitwise
-  swUserId    Int?
-  swGroupId   Int?
-  transaction Transaction[]
+  swUserId  Int?
+  swGroupId Int?
 
   @@id([userId, groupId])
 }
