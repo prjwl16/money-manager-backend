@@ -8,16 +8,9 @@ router.get('/', async (_req, res) => {
 
   const { id } = res.locals.user
 
-  const groups = await prisma.userGroup.findMany({
-    where: {
-      user: {
-        id,
-      },
-    },
-  })
   return res.send({
     success: true,
-    data: groups,
+    data: 'groups',
     error: null,
   })
 })
