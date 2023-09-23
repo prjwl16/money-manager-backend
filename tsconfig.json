@@ -3,16 +3,12 @@
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "target": "ES2022",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "outDir": "dist",
     "rootDir": ".",
     "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-
-    }
   },
   "include": [
     "src/**/*"
