@@ -26,7 +26,7 @@ model User {
   swAccessToken String?
   doneSetup     Boolean       @default(false)
   // Relations
-  Transaction   Transaction[]
+  transaction   Transaction[]
   accounts      Account[]
   categories    Category[]
 }
@@ -50,7 +50,7 @@ model Transaction {
   recurringEndDate     DateTime?
   // Relations
   createdBy            Int
-  createdByUser        User              @relation(fields: [createdBy], references: [id])
+  userId               User              @relation(fields: [createdBy], references: [id])
   accountId            Int
   categoryId           Int
   category             Category?         @relation(fields: [categoryId], references: [id])
@@ -99,6 +99,8 @@ enum TransactionAction {
 
 enum RecurringPeriod {
   ONETIME
+  DAILY
+  WEEKLY
   MONTHLY
   QUARTERLY
   HALF_YEARLY

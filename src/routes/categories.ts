@@ -50,7 +50,7 @@ const categoryModule = {
       const category = await prisma.category.create({
         data: {
           ...data,
-          createdByUser: {
+          userId: {
             connect: {
               id,
             },
