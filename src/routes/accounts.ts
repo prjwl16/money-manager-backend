@@ -20,13 +20,17 @@ const accountModule = {
   },
   addAccount: async (req: Request, res: Response) => {
     const { id } = res.locals.user
-    const { name, balance, isDefault } = req.body
+    const { name, balance, isDefault } = req.body[0]
     try {
       const response = await prisma.account.create({
         data: {
           name,
           balance,
-          userId: id,
+          user: {
+            connect: {
+              id,
+            },
+          },
           isDefault,
         },
       })

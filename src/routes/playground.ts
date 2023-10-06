@@ -1,16 +1,19 @@
 import { Router } from 'express'
 import prisma from '../../prisma/client.js'
+import { fetchAndAddTransactions } from '../utils/scheduler.js'
 
 const router = Router()
 
 router.get('/', async (_req, res) => {
-  //get groups of a user
-
   const { id } = res.locals.user
+
+  //add recurring transactions
+
+  await fetchAndAddTransactions()
 
   return res.send({
     success: true,
-    data: 'groups',
+    data: '',
     error: null,
   })
 })
