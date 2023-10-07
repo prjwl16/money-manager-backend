@@ -65,7 +65,7 @@ model RecurringTransaction {
   description         String?
   date                DateTime?
   place               String?
-  recurringPeriod     RecurringPeriod   @default(ONETIME)
+  recurringPeriod     RecurringPeriod   @default(MONTHLY)
   numberOfOccurrences Int?              @default(0)
   startDate           DateTime?
   endDate             DateTime?

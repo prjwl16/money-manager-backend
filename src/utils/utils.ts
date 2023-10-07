@@ -1,5 +1,6 @@
 import prisma from '../../prisma/client.js'
 import moment from 'moment/moment.js'
+import { Prisma } from '@prisma/client'
 
 export const verifyAccount = async (accountId: number, userId: number) => {
   const account = await prisma.account.findUnique({
@@ -75,4 +76,44 @@ export const getMomentPeriods = (
       break
   }
   return period
+}
+
+export const parseTransactionFromRecurringTransaction = (recurringTransactions: any) => {
+  const transactions = []
+
+  for (const recurringTransaction of recurringTransactions) {
+    transactions.push({
+      type: recurringTransaction.type,
+      amount: recurringTransaction.amount,
+      currency: recurringTransaction.currency,
+      name: recurringTransaction.name,
+      description: recurringTransaction.description || '',
+      date: recurringTransaction.startDate,
+      place: recurringTransaction.place,
+      isRecurring: true,
+      user: {
+        connect: {
+          id: recurringTransaction.createdBy,
+        },
+      },
+      recurringTransactions: recurringTransaction.id
+        ? {
+            connect: {
+              id: recurringTransaction.id,
+            },
+          }
+        : undefined,
+      account: {
+        connect: {
+          id: recurringTransaction.accountId,
+        },
+      },
+      category: {
+        connect: {
+          id: recurringTransaction.categoryId,
+        },
+      },
+    })
+  }
+  return transactions
 }
