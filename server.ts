@@ -25,18 +25,19 @@ app.use(router)
 import schedule from 'node-schedule'
 import { fetchAndAddTransactions } from './src/utils/scheduler.js'
 
-const rule = new schedule.RecurrenceRule()
-rule.hour = 0
-rule.minute = 0
-rule.second = 0
-
-const job = schedule.scheduleJob(rule, async () => {
-  console.log('Running a job at 12:00 AM')
-  const startTime = new Date().getTime()
-  await fetchAndAddTransactions()
-  const endTime = new Date().getTime()
-  console.log('Time taken to run the job: ', endTime - startTime)
-})
+schedule.scheduleJob(
+  {
+    hour: 0,
+    minute: 0,
+  },
+  async () => {
+    console.log('Running a job at 12:00 AM')
+    const startTime = new Date().getTime()
+    await fetchAndAddTransactions()
+    const endTime = new Date().getTime()
+    console.log('Time taken to run the job: ', endTime - startTime)
+  }
+)
 
 //Remove all locals
 app.listen(port, () => {
