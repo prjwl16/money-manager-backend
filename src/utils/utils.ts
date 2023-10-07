@@ -79,7 +79,7 @@ export const getMomentPeriods = (
 }
 
 export const parseTransactionFromRecurringTransaction = (recurringTransactions: any) => {
-  const transactions = []
+  const transactions: Prisma.TransactionCreateManyInput[] = []
 
   for (const recurringTransaction of recurringTransactions) {
     transactions.push({
@@ -91,28 +91,10 @@ export const parseTransactionFromRecurringTransaction = (recurringTransactions: 
       date: recurringTransaction.startDate,
       place: recurringTransaction.place,
       isRecurring: true,
-      user: {
-        connect: {
-          id: recurringTransaction.createdBy,
-        },
-      },
-      recurringTransactions: recurringTransaction.id
-        ? {
-            connect: {
-              id: recurringTransaction.id,
-            },
-          }
-        : undefined,
-      account: {
-        connect: {
-          id: recurringTransaction.accountId,
-        },
-      },
-      category: {
-        connect: {
-          id: recurringTransaction.categoryId,
-        },
-      },
+      createdBy: recurringTransaction.createdBy,
+      recurringTransactionId: recurringTransaction.id,
+      accountId: recurringTransaction.accountId,
+      categoryId: recurringTransaction.categoryId,
     })
   }
   return transactions
