@@ -13,6 +13,9 @@ CREATE TYPE "AccountType" AS ENUM ('CASH', 'BANK', 'CREDIT_CARD', 'DEBIT_CARD', 
 -- CreateEnum
 CREATE TYPE "Currency" AS ENUM ('INR', 'USD');
 
+-- CreateEnum
+CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'CANCELLED', 'SKIPPED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
@@ -44,9 +47,12 @@ CREATE TABLE "Transaction" (
     "place" TEXT,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL,
+    "status" "TransactionStatus" NOT NULL DEFAULT 'PENDING',
     "createdBy" INTEGER NOT NULL,
     "accountId" INTEGER NOT NULL,
     "categoryId" INTEGER NOT NULL,
+    "isRecurring" BOOLEAN NOT NULL DEFAULT false,
+    "recurringTransactionId" INTEGER,
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
@@ -61,31 +67,19 @@ CREATE TABLE "RecurringTransaction" (
     "description" TEXT,
     "date" TIMESTAMP(3),
     "place" TEXT,
-    "recurringPeriod" "RecurringPeriod" NOT NULL DEFAULT 'ONETIME',
-    "numberOfOccurances" INTEGER DEFAULT 0,
+    "recurringPeriod" "RecurringPeriod" NOT NULL DEFAULT 'MONTHLY',
+    "numberOfOccurrences" INTEGER DEFAULT 0,
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "nextExecutionDate" TIMESTAMP(3),
     "createdBy" INTEGER NOT NULL,
+    "accountId" INTEGER NOT NULL,
+    "categoryId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "RecurringTransaction_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BaseTransaction" (
-    "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
-    "currency" "Currency" NOT NULL DEFAULT 'INR',
-    "name" TEXT,
-    "createdBy" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP NOT NULL,
-    "recurringTransactionId" INTEGER,
-
-    CONSTRAINT "BaseTransaction_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -136,13 +130,16 @@ ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_categoryId_fkey" FOREIGN K
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_recurringTransactionId_fkey" FOREIGN KEY ("recurringTransactionId") REFERENCES "RecurringTransaction"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "RecurringTransaction" ADD CONSTRAINT "RecurringTransaction_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BaseTransaction" ADD CONSTRAINT "BaseTransaction_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RecurringTransaction" ADD CONSTRAINT "RecurringTransaction_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BaseTransaction" ADD CONSTRAINT "BaseTransaction_recurringTransactionId_fkey" FOREIGN KEY ("recurringTransactionId") REFERENCES "RecurringTransaction"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "RecurringTransaction" ADD CONSTRAINT "RecurringTransaction_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

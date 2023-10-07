@@ -65,7 +65,7 @@ export const fetchAndAddTransactions = async () => {
         })
       })
       .catch((e) => {
-        console.log('e: ', e)
+        console.log('error adding transactions: ', e)
       })
   } catch (e) {
     console.log('ERR: ', e)

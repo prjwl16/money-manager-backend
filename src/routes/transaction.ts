@@ -8,7 +8,7 @@ const router = Router()
 const limit = 15
 
 //private functions
-const addTransaction = async (data, userId: number) => {
+export const addTransaction = async (data, userId: number) => {
   try {
     const response = {}
     await verifyAccount(data.accountId, userId)
@@ -33,7 +33,7 @@ const addTransaction = async (data, userId: number) => {
             currency: data.currency,
             description: data.description || '',
             date: data.date ? new Date(data.date) : new Date(),
-            startDate: data.startDate ? new Date(data.startDate) : new Date(),
+            startDate: data.startDate ? new Date(data.startDate) : data.date ? new Date(data.date) : new Date(),
             endDate: endDate,
             numberOfOccurrences: data.numberOfOccurrences,
             nextExecutionDate: new Date(nextExecutionDate),
@@ -60,40 +60,44 @@ const addTransaction = async (data, userId: number) => {
         recurringTransactionId = recurringTransaction.id
         response['recurringTransaction'] = recurringTransaction
       }
-      response['transaction'] = await prisma.transaction.create({
-        data: {
-          type: data.type,
-          name: data.name,
-          amount: data.amount,
-          currency: data.currency,
-          description: data.description || '',
-          date: data.date ? new Date(data.date) : new Date(),
-          place: data.place,
-          isRecurring: data.isRecurring,
-          recurringTransactions: recurringTransactionId
-            ? {
-                connect: {
-                  id: recurringTransactionId,
-                },
-              }
-            : undefined,
-          user: {
-            connect: {
-              id: userId,
+
+      //if the transaction is recurring and startDate is in the past, then add transaction
+      if (!data.startDate || (data.startDate && new Date(data.startDate) <= new Date())) {
+        response['transaction'] = await prisma.transaction.create({
+          data: {
+            type: data.type,
+            name: data.name,
+            amount: data.amount,
+            currency: data.currency,
+            description: data.description || '',
+            date: data.date ? new Date(data.date) : new Date(),
+            place: data.place,
+            isRecurring: data.isRecurring,
+            recurringTransactions: recurringTransactionId
+              ? {
+                  connect: {
+                    id: recurringTransactionId,
+                  },
+                }
+              : undefined,
+            user: {
+              connect: {
+                id: userId,
+              },
+            },
+            account: {
+              connect: {
+                id: data.accountId,
+              },
+            },
+            category: {
+              connect: {
+                id: data.categoryId,
+              },
             },
           },
-          account: {
-            connect: {
-              id: data.accountId,
-            },
-          },
-          category: {
-            connect: {
-              id: data.categoryId,
-            },
-          },
-        },
-      })
+        })
+      }
     })
     return response
   } catch (e) {
