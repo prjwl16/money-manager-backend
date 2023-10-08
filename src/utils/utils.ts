@@ -22,8 +22,8 @@ export const verifyCategory = async (categoryId: number, userId: number) => {
   if (category.userId && category.userId !== userId) throw Error('Category does not belong to user')
 }
 export const calculateEndDate = (
-  endDate: Date,
   startDate: Date,
+  endDate: Date,
   numberOfOccurrences: number,
   recurringPeriod: 'days' | 'weeks' | 'months' | 'years'
 ) => {
