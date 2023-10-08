@@ -22,9 +22,14 @@ export const addTransaction = async (data, userId: number) => {
 
         const recurringPeriod = getMomentPeriods(data.recurringPeriod)
 
-        const nextExecutionDate = moment(data.startDate).add(1, recurringPeriod).toDate()
+        //check if the startDate is greater than today, if yes then nextExecution date will be start date
 
-        const endDate = calculateEndDate(data.endDate, data.startDate, data.numberOfOccurrences, recurringPeriod)
+        const nextExecutionDate =
+          new Date(data.startDate) >= new Date()
+            ? new Date(data.startDate)
+            : moment(data.startDate).add(1, recurringPeriod).toDate()
+
+        const endDate = calculateEndDate(data.startDate, data.endDate, data.numberOfOccurrences, recurringPeriod)
         const recurringTransaction = await prisma.recurringTransaction.create({
           data: {
             type: data.type,
@@ -240,10 +245,77 @@ const transactionModule = {
       })
     }
   },
+
+  getUpcomingTransactions: async (req: Request, res: Response) => {
+    const { id } = res.locals.user
+    const offset = parseInt(req.params.offset) || 0
+
+    const toDate = req.body.toDate ? new Date(req.body.toDate) : moment().add(3, 'days').toDate()
+
+    try {
+      const response = await prisma.recurringTransaction.findMany({
+        where: {
+          user: {
+            id,
+          },
+          nextExecutionDate: {
+            lte: toDate,
+            gte: new Date(),
+          },
+          isActive: true,
+        },
+        skip: offset * limit,
+        take: limit,
+      })
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
+
+  getRecurringTransactions: async (req: Request, res: Response) => {
+    try {
+      const { id } = res.locals.user
+      const query = JSON.parse(req.query.q as string)
+      const offset = parseInt(query.offset) || 0
+      const { type, sort, order } = query
+
+      const response = await prisma.recurringTransaction.findMany({
+        where: {
+          user: {
+            id,
+          },
+          type,
+        },
+        orderBy: {
+          [sort]: order,
+        },
+        skip: offset * limit,
+        take: limit,
+      })
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
 }
 
+router.get('/recurring', transactionModule.getRecurringTransactions)
 router.get('/:offset', transactionModule.get)
 router.post('/', transactionModule.add)
 router.post('/:offset', transactionModule.getFilteredTransactions)
+router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
 
 export { router as transactionRouter }
