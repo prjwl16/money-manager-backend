@@ -186,6 +186,32 @@ const getTransactions = async (body: TransactionFilterType) => {
   return response
 }
 
+const getTransactionByMonthAndType = async (userId: number, from: Date, to: Date) => {
+  return prisma.transaction
+    .groupBy({
+      by: ['type'],
+      where: {
+        user: {
+          id: userId,
+        },
+        date: {
+          gte: from,
+          lte: to,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    })
+    .then((res) => {
+      const response = {}
+      res.forEach((r) => {
+        response[r.type] = r._sum.amount
+      })
+      return response
+    })
+}
+
 const transactionModule = {
   get: async (req: Request, res: Response) => {
     const { id } = res.locals.user
@@ -356,13 +382,61 @@ const transactionModule = {
       })
     }
   },
+
+  getIncomeAndExpenseLastThreeMonths: async (req: Request, res: Response) => {
+    try {
+      const { id } = res.locals.user
+
+      const response = {}
+      const currentMonth = moment().startOf('month').format('MMMM')
+      response[currentMonth] = await getTransactionByMonthAndType(
+        id,
+        moment().startOf('month').toDate(),
+        moment().endOf('month').toDate()
+      )
+      response[moment().subtract(1, 'months').startOf('month').format('MMMM')] = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(1, 'months').startOf('month').toDate(),
+        moment().subtract(1, 'months').endOf('month').toDate()
+      )
+      response[moment().subtract(2, 'months').startOf('month').format('MMMM')] = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(2, 'months').startOf('month').toDate(),
+        moment().subtract(2, 'months').endOf('month').toDate()
+      )
+
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
 }
 
+// Retrieve transactions by category
 router.get('/categories', transactionModule.getTransactionsByCategory)
+
+// Retrieve recurring transactions
 router.get('/recurring', transactionModule.getRecurringTransactions)
+
+// Retrieve income and expense data for the last three months
+router.get('/income-expense', transactionModule.getIncomeAndExpenseLastThreeMonths)
+
+// Retrieve upcoming transactions with an offset
 router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
+
+// Retrieve transactions with an offset (this could be for pagination)
 router.get('/:offset', transactionModule.get)
+
+// Add a new transaction
 router.post('/', transactionModule.add)
-router.post('/:offset', transactionModule.getFilteredTransactions)
+
+// Filter transactions with an offset using a POST request (consider using a GET request with query parameters for filtering)
+router.post('/filter/:offset', transactionModule.getFilteredTransactions)
 
 export { router as transactionRouter }
