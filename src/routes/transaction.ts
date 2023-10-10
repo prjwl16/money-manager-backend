@@ -310,12 +310,59 @@ const transactionModule = {
       })
     }
   },
+
+  getTransactionsByCategory: async (req: Request, res: Response) => {
+    try {
+      const { id } = res.locals.user
+      // const query = JSON.parse(req.query.q as string)
+      // const offset = parseInt(query.offset) || 0
+      // const { sort, order, categories } = query
+
+      const response = {}
+      await prisma.$transaction(async (prisma) => {
+        //count the amount of each category of a user
+        const sumByCategories = await prisma.transaction.groupBy({
+          by: ['categoryId'],
+          _sum: {
+            amount: true,
+          },
+          where: {
+            user: {
+              id,
+            },
+          },
+        })
+
+        const responseObj = []
+
+        sumByCategories.forEach((category) => {
+          responseObj.push({
+            categoryId: category.categoryId,
+            sum: category._sum.amount,
+          })
+        })
+
+        response['sum'] = responseObj
+      })
+
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
 }
 
+router.get('/categories', transactionModule.getTransactionsByCategory)
 router.get('/recurring', transactionModule.getRecurringTransactions)
+router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
 router.get('/:offset', transactionModule.get)
 router.post('/', transactionModule.add)
 router.post('/:offset', transactionModule.getFilteredTransactions)
-router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
 
 export { router as transactionRouter }
