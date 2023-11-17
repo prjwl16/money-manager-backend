@@ -186,6 +186,32 @@ const getTransactions = async (body: TransactionFilterType) => {
   return response
 }
 
+const getTransactionByMonthAndType = async (userId: number, from: Date, to: Date) => {
+  return prisma.transaction
+    .groupBy({
+      by: ['type'],
+      where: {
+        user: {
+          id: userId,
+        },
+        date: {
+          gte: from,
+          lte: to,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    })
+    .then((res) => {
+      const response = {}
+      res.forEach((r) => {
+        response[r.type] = r._sum.amount
+      })
+      return response
+    })
+}
+
 const transactionModule = {
   get: async (req: Request, res: Response) => {
     const { id } = res.locals.user
@@ -229,28 +255,12 @@ const transactionModule = {
     }
   },
 
-  getFilteredTransactions: async (req: Request, res: Response) => {
-    const { id } = res.locals.user
-    const offset = parseInt(req.params.offset) || 0
-    try {
-      const response = await getTransactions(req.body)
-      return res.send({
-        success: true,
-        data: response,
-      })
-    } catch (e) {
-      console.log('ERR: ', e)
-      return res.boom.badRequest('Failed to get transactions', {
-        success: false,
-      })
-    }
-  },
-
   getUpcomingTransactions: async (req: Request, res: Response) => {
     const { id } = res.locals.user
     const offset = parseInt(req.params.offset) || 0
+    const query = JSON.parse(req.query.q as string)
 
-    const toDate = req.body.toDate ? new Date(req.body.toDate) : moment().add(3, 'days').toDate()
+    const toDate = query.toDate ? new Date(query.toDate) : moment().add(1, 'months').toDate()
 
     try {
       const response = await prisma.recurringTransaction.findMany({
@@ -310,12 +320,140 @@ const transactionModule = {
       })
     }
   },
+
+  getTransactionsByCategory: async (req: Request, res: Response) => {
+    try {
+      const { id } = res.locals.user
+      // const query = JSON.parse(req.query.q as string)
+      // const offset = parseInt(query.offset) || 0
+      // const { sort, order, categories } = query
+
+      const response = {}
+      await prisma.$transaction(async (prisma) => {
+        //count the amount of each category of a user
+        const sumByCategories = await prisma.transaction.groupBy({
+          by: ['categoryId'],
+          _sum: {
+            amount: true,
+          },
+          where: {
+            user: {
+              id,
+            },
+          },
+        })
+
+        const responseObj = []
+
+        sumByCategories.forEach((category) => {
+          responseObj.push({
+            categoryId: category.categoryId,
+            sum: category._sum.amount,
+          })
+        })
+
+        response['sum'] = responseObj
+      })
+
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
+
+  getIncomeAndExpenseLastThreeMonths: async (req: Request, res: Response) => {
+    try {
+      const { id } = res.locals.user
+
+      const response = []
+
+      const currentMonth = moment().startOf('month').format('MMM')
+      const currentMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().startOf('month').toDate(),
+        moment().endOf('month').toDate()
+      )
+
+      const prevMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(1, 'months').startOf('month').toDate(),
+        moment().subtract(1, 'months').endOf('month').toDate()
+      )
+
+      const prevPrevMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(2, 'months').startOf('month').toDate(),
+        moment().subtract(2, 'months').endOf('month').toDate()
+      )
+
+      const prevPrevPrevMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(3, 'months').startOf('month').toDate(),
+        moment().subtract(3, 'months').endOf('month').toDate()
+      )
+
+      const prevPrevPrevPrevMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(4, 'months').startOf('month').toDate(),
+        moment().subtract(4, 'months').endOf('month').toDate()
+      )
+      const prevPrevPrevPrevPrevMonthData = await getTransactionByMonthAndType(
+        id,
+        moment().subtract(5, 'months').startOf('month').toDate(),
+        moment().subtract(5, 'months').endOf('month').toDate()
+      )
+
+      response.push({
+        name: moment().subtract(5, 'months').startOf('month').format('MMM'),
+        ...prevPrevPrevPrevPrevMonthData,
+      })
+
+      response.push({
+        name: moment().subtract(4, 'months').startOf('month').format('MMM'),
+        ...prevPrevPrevPrevMonthData,
+      })
+
+      response.push({
+        name: moment().subtract(3, 'months').startOf('month').format('MMM'),
+        ...prevPrevPrevMonthData,
+      })
+      response.push({
+        name: moment().subtract(2, 'months').startOf('month').format('MMM'),
+        ...prevPrevMonthData,
+      })
+      response.push({
+        name: moment().subtract(1, 'months').startOf('month').format('MMM'),
+        ...prevMonthData,
+      })
+      response.push({
+        name: currentMonth,
+        ...currentMonthData,
+      })
+
+      return res.send({
+        success: true,
+        data: response,
+      })
+    } catch (e) {
+      console.log('ERR: ', e)
+      return res.boom.badRequest('Failed to get transactions', {
+        success: false,
+      })
+    }
+  },
 }
 
+router.get('/categories', transactionModule.getTransactionsByCategory)
 router.get('/recurring', transactionModule.getRecurringTransactions)
+router.get('/income-expense', transactionModule.getIncomeAndExpenseLastThreeMonths)
+router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
 router.get('/:offset', transactionModule.get)
 router.post('/', transactionModule.add)
-router.post('/:offset', transactionModule.getFilteredTransactions)
-router.get('/upcoming/:offset', transactionModule.getUpcomingTransactions)
 
 export { router as transactionRouter }
