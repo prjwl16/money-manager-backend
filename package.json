@@ -2,7 +2,7 @@
   "name": "money-manager-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
+  "main": "src/server.ts",
   "type": "module",
   "engines": {
     "node": "18.17.0",

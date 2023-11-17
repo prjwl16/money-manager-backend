@@ -1,10 +1,10 @@
 import 'dotenv/config'
 import express from 'express'
-import './src/config/passport.js'
+import './config/passport.js'
 import config from 'config'
-import { sendMessage } from './src/APIs/bots/twilioCalls.js'
-import { Middlewares } from './src/middleware/index.js'
-import { router } from './src/routes/index.js'
+import { sendMessage } from './APIs/bots/twilioCalls.js'
+import { Middlewares } from './middleware/index.js'
+import { router } from './routes/index.js'
 
 //Initiate express app
 const app = express()
@@ -23,7 +23,7 @@ app.use(router)
 
 //write a node-schedule to run every day at 12:00 AM to add recurring transactions to the database
 import schedule from 'node-schedule'
-import { fetchAndAddTransactions } from './src/utils/scheduler.js'
+import { fetchAndAddTransactions } from './utils/scheduler.js'
 
 schedule.scheduleJob(
   {
