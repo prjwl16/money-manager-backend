@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express'
-import prisma from '../prisma/client.js'
+import prisma from '../../prisma/client.js'
 import moment from 'moment'
 import { calculateEndDate, getMomentPeriods, verifyAccount, verifyCategory } from '../utils/utils.js'
 import { TransactionFilterType } from '../types/transaction.js'

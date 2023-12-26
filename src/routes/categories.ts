@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { Request, Response } from 'express'
-import prisma from '../prisma/client.js'
+import prisma from '../../prisma/client.js'
 import { defaultCategories } from '../utils/defaultCategories.js'
 
 const router = Router()
