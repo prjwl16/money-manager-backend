@@ -1,4 +1,4 @@
-import prisma from '../../prisma/client.js'
+import prisma from '../prisma/client.js'
 import moment from 'moment/moment.js'
 import { Prisma } from '@prisma/client'
 

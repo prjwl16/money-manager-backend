@@ -1,6 +1,6 @@
-import prisma from '../../prisma/client.js'
 import bcrypt from 'bcrypt'
 import { Prisma } from '@prisma/client'
+import prisma from '../prisma/client.js'
 
 const User = prisma.user
 
