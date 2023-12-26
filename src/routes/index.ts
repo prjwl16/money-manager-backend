@@ -10,6 +10,7 @@ import { transactionRouter } from './transaction.js'
 import { categoryRouter } from './categories.js'
 import { accountRouter } from './accounts.js'
 import { cardRouter } from './cards.js'
+import { paymentsRouter } from './payments.js'
 
 const router = Router()
 
@@ -32,5 +33,6 @@ tokenRoutes.use('/cards', cardRouter)
 
 router.use('/api', verifyToken, tokenRoutes)
 router.use('/oauth', oauthRoutes)
+router.use('/', verifyToken, paymentsRouter)
 
 export { router }

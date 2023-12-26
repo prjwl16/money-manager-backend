@@ -2,7 +2,7 @@
   "name": "money-manager-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.ts",
+  "main": "src/server.js",
   "type": "module",
   "engines": {
     "node": "18.17.0",
@@ -51,6 +51,7 @@
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "prettier": "^3.0.1",
+    "stripe": "^14.10.0",
     "ts-node": "^10.9.1",
     "twilio": "^4.16.0",
     "typescript": "^5.1.6",
