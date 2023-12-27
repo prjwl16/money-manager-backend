@@ -1,4 +1,4 @@
-import prisma from '../../prisma/client.js'
+import prisma from '../client.js'
 import moment from 'moment'
 import { calculateNextExecutionDate, getMomentPeriods, parseTransactionFromRecurringTransaction } from './utils.js'
 import { Prisma } from '@prisma/client'

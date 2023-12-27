@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import prisma from '../../prisma/client.js'
+import prisma from '../client.js'
 import { fetchAndAddTransactions } from '../utils/scheduler.js'
 import { addTransaction } from './transaction.js'
 
